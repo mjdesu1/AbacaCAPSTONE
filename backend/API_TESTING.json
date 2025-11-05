@@ -1,0 +1,203 @@
+{
+  "info": {
+    "name": "MAO Culiram Abaca - Authentication API",
+    "description": "API collection for testing authentication endpoints",
+    "version": "1.0.0"
+  },
+  "baseUrl": "http://localhost:3001/api/auth",
+  "requests": [
+    {
+      "name": "1. Register Farmer",
+      "method": "POST",
+      "url": "{{baseUrl}}/register/farmer",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "fullName": "Juan Dela Cruz",
+        "sex": "Male",
+        "age": 45,
+        "contactNumber": "09171234567",
+        "address": "Purok 1",
+        "barangay": "Culiram",
+        "municipality": "Prosperidad",
+        "associationName": "CuSAFA",
+        "farmLocation": "Sitio Riverside",
+        "farmCoordinates": "8.5167,126.0833",
+        "farmAreaHectares": 2.5,
+        "yearsInFarming": 15,
+        "typeOfAbacaPlanted": "Musa Textilis",
+        "averageHarvestVolumeKg": 500,
+        "harvestFrequencyWeeks": 12,
+        "sellingPriceRangeMin": 25.00,
+        "sellingPriceRangeMax": 30.00,
+        "regularBuyer": "Noy-Noy Abaca Trading",
+        "incomePerCycle": 15000.00,
+        "email": "juan.delacruz@example.com",
+        "password": "FarmerPass123!",
+        "remarks": "Active farmer since 2009"
+      }
+    },
+    {
+      "name": "2. Register Buyer",
+      "method": "POST",
+      "url": "{{baseUrl}}/register/buyer",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "businessName": "Noy-Noy Abaca Trading",
+        "ownerName": "Noy-Noy Santos",
+        "businessAddress": "123 Main Street, Prosperidad, Agusan del Sur",
+        "contactNumber": "09181234567",
+        "email": "noynoy@abacatrading.com",
+        "licenseOrAccreditation": "PhilFIDA-2024-001",
+        "buyingSchedule": "Monday to Friday, 8:00 AM - 5:00 PM",
+        "buyingLocation": "Main Warehouse, Prosperidad",
+        "warehouseAddress": "456 Warehouse Road, Prosperidad",
+        "acceptedQualityGrades": ["Grade A", "Grade B", "Grade C"],
+        "priceRangeMin": 20.00,
+        "priceRangeMax": 35.00,
+        "paymentTerms": "Cash on Delivery",
+        "partneredAssociations": ["CuSAFA", "SAAD", "DAFAC"],
+        "password": "BuyerPass123!",
+        "remarks": "Trusted buyer for 10 years"
+      }
+    },
+    {
+      "name": "3. Register Association Officer",
+      "method": "POST",
+      "url": "{{baseUrl}}/register/officer",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "fullName": "Maria Santos",
+        "position": "President",
+        "associationName": "CuSAFA",
+        "contactNumber": "09191234567",
+        "email": "maria.santos@cusafa.org",
+        "address": "Barangay Culiram, Prosperidad, Agusan del Sur",
+        "termStartDate": "2023-01-01",
+        "termEndDate": "2025-12-31",
+        "termDuration": "2023-2025",
+        "farmersUnderSupervision": 50,
+        "password": "OfficerPass123!",
+        "remarks": "Elected president in 2023"
+      }
+    },
+    {
+      "name": "4. Login as Farmer",
+      "method": "POST",
+      "url": "{{baseUrl}}/login",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "email": "juan.delacruz@example.com",
+        "password": "FarmerPass123!",
+        "userType": "farmer"
+      }
+    },
+    {
+      "name": "5. Login as Buyer",
+      "method": "POST",
+      "url": "{{baseUrl}}/login",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "email": "noynoy@abacatrading.com",
+        "password": "BuyerPass123!",
+        "userType": "buyer"
+      }
+    },
+    {
+      "name": "6. Login as Officer",
+      "method": "POST",
+      "url": "{{baseUrl}}/login",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "email": "maria.santos@cusafa.org",
+        "password": "OfficerPass123!",
+        "userType": "officer"
+      }
+    },
+    {
+      "name": "7. Get Current User",
+      "method": "GET",
+      "url": "{{baseUrl}}/me",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {{accessToken}}"
+      },
+      "description": "Replace {{accessToken}} with the token from login response"
+    },
+    {
+      "name": "8. Refresh Token",
+      "method": "POST",
+      "url": "{{baseUrl}}/refresh",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "refreshToken": "{{refreshToken}}"
+      },
+      "description": "Replace {{refreshToken}} with the refresh token from login response"
+    },
+    {
+      "name": "9. Logout",
+      "method": "POST",
+      "url": "{{baseUrl}}/logout",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "userId": "{{userId}}",
+        "userType": "farmer"
+      },
+      "description": "Replace {{userId}} with the user ID from login response"
+    }
+  ],
+  "testScenarios": [
+    {
+      "scenario": "Complete Registration and Login Flow",
+      "steps": [
+        "1. Register a new farmer using 'Register Farmer' request",
+        "2. Copy the farmerId from the response",
+        "3. Login using 'Login as Farmer' request",
+        "4. Copy the accessToken and refreshToken from response",
+        "5. Use accessToken in 'Get Current User' request",
+        "6. Test 'Refresh Token' with the refreshToken",
+        "7. Logout using the userId"
+      ]
+    },
+    {
+      "scenario": "Test Validation Errors",
+      "steps": [
+        "1. Try registering with invalid email format",
+        "2. Try registering with weak password (< 8 chars)",
+        "3. Try registering with duplicate email",
+        "4. Try login with wrong password",
+        "5. Try login with non-existent email"
+      ]
+    },
+    {
+      "scenario": "Test All User Types",
+      "steps": [
+        "1. Register and login as Farmer",
+        "2. Register and login as Buyer",
+        "3. Register and login as Officer",
+        "4. Verify each user type returns correct data structure"
+      ]
+    }
+  ],
+  "notes": {
+    "baseUrl": "Change to your server URL (default: http://localhost:3001/api/auth)",
+    "reCAPTCHA": "recaptchaToken is optional in development if not configured",
+    "tokens": "Access tokens expire in 15 minutes, refresh tokens in 7 days",
+    "passwords": "Must contain uppercase, lowercase, number, and special character"
+  }
+}
