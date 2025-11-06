@@ -13,6 +13,8 @@ import maintenanceRoutes from './routes/maintenanceRoutes';
 import seedlingRoutes from './routes/seedlingRoutes';
 import articlesRoutes from './routes/articlesRoutes';
 import teamRoutes from './routes/teamRoutes';
+import harvestRoutes from './routes/harvestRoutes';
+import inventoryRoutes from './routes/inventoryRoutes';
 
 // Import config
 import { config } from './config/env';
@@ -39,6 +41,8 @@ app.use('/api/maintenance', maintenanceRoutes);
 app.use('/api/seedlings', seedlingRoutes);
 app.use('/api/articles', articlesRoutes);
 app.use('/api/team', teamRoutes);
+app.use('/api/harvests', harvestRoutes);
+app.use('/api/inventory', inventoryRoutes);
 
 app.get('/', (req: Request, res: Response) => {
   res.json({ message: 'MAO Culiram Abaca System API' });

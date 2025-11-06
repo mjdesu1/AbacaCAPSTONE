@@ -23,6 +23,7 @@ import {
   Download
 } from 'lucide-react';
 import FarmerMonitoringView from './FarmerMonitoringView';
+import FarmerHarvestView from './FarmerHarvestView';
 
 interface FarmerDashboardProps {
   onLogout: () => void;
@@ -30,7 +31,7 @@ interface FarmerDashboardProps {
 
 const FarmerDashboard: React.FC<FarmerDashboardProps> = ({ onLogout }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [currentPage, setCurrentPage] = useState<'dashboard' | 'seedlings' | 'harvest' | 'monitoring' | 'profile'>('dashboard');
+  const [currentPage, setCurrentPage] = useState<'dashboard' | 'seedlings' | 'harvest' | 'harvest-submit' | 'monitoring' | 'profile'>('dashboard');
   const [seedlings, setSeedlings] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [showPlantingModal, setShowPlantingModal] = useState(false);
@@ -800,11 +801,7 @@ const FarmerDashboard: React.FC<FarmerDashboardProps> = ({ onLogout }) => {
           )}
 
           {currentPage === 'harvest' && (
-            <div className="bg-white rounded-xl shadow-lg p-12 text-center">
-              <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-xl font-bold text-gray-800 mb-2">Harvest Records</h3>
-              <p className="text-gray-600">Coming soon...</p>
-            </div>
+            <FarmerHarvestView />
           )}
 
           {currentPage === 'monitoring' && (

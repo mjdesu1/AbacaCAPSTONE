@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Users, ArrowLeft } from 'lucide-react';
+import { Eye, EyeOff, User, Lock, Users, ArrowLeft } from 'lucide-react';
+import { completeLogin } from '../utils/authToken';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 
 interface OfficerAuthProps {
@@ -48,10 +49,13 @@ export const OfficerAuth: React.FC<OfficerAuthProps> = ({ onBack, onLoginSuccess
         throw new Error(data.error || 'Login failed');
       }
 
-      localStorage.setItem('accessToken', data.data.tokens.accessToken);
-      localStorage.setItem('refreshToken', data.data.tokens.refreshToken);
-      localStorage.setItem('userType', 'officer');
-      localStorage.setItem('user', JSON.stringify(data.data.user));
+      // Use centralized token management
+      completeLogin(
+        data.data.tokens.accessToken,
+        data.data.tokens.refreshToken,
+        data.data.user,
+        'officer'
+      );
 
       alert('Login successful!');
       onLoginSuccess();

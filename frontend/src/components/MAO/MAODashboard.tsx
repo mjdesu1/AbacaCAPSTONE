@@ -17,8 +17,6 @@ import {
   Settings,
   ChevronDown,
   Mail,
-  Phone,
-  MapPin,
   Briefcase,
   Shield,
   Camera,
@@ -35,6 +33,10 @@ import PlantingMonitor from './PlantingMonitor';
 import MonitoringPage from '../../pages/MonitoringPage';
 import ArticleManagement from './ArticleManagement';
 import TeamManagement from './TeamManagement';
+import MAOHarvestVerificationPage from '../../pages/MAOHarvestVerificationPage';
+import MAOInventoryPage from '../../pages/MAOInventoryPage';
+import SuperAdminHarvestDashboard from '../../pages/SuperAdminHarvestDashboard';
+import SuperAdminInventoryDashboard from '../../pages/SuperAdminInventoryDashboard';
 
 interface MAODashboardProps {
   onLogout: () => void;
@@ -43,7 +45,7 @@ interface MAODashboardProps {
 const MAODashboard: React.FC<MAODashboardProps> = ({ onLogout }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useState<'farmers' | 'buyers'>('farmers');
-  const [currentPage, setCurrentPage] = useState<'dashboard' | 'users' | 'officers' | 'maintenance' | 'seedlings' | 'planting' | 'monitoring' | 'content'>('dashboard');
+  const [currentPage, setCurrentPage] = useState<'dashboard' | 'users' | 'officers' | 'maintenance' | 'seedlings' | 'planting' | 'monitoring' | 'content' | 'harvests' | 'inventory' | 'all-harvests' | 'all-inventory'>('dashboard');
   const [contentTab, setContentTab] = useState<'articles' | 'team'>('articles');
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -296,7 +298,7 @@ const MAODashboard: React.FC<MAODashboardProps> = ({ onLogout }) => {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+        <nav className="flex-1 p-4 space-y-2 overflow-y-auto scrollbar-hide">
           <button 
             onClick={() => setCurrentPage('dashboard')}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
@@ -346,7 +348,53 @@ const MAODashboard: React.FC<MAODashboardProps> = ({ onLogout }) => {
             <Calendar className="w-5 h-5 flex-shrink-0" />
             <span className={`transition-all duration-300 ease-in-out whitespace-nowrap ${sidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0'} overflow-hidden`}>Field Monitoring</span>
           </button>
+
+          <button 
+            onClick={() => setCurrentPage('harvests')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+              currentPage === 'harvests' ? 'bg-emerald-600' : 'hover:bg-slate-700'
+            } ${!sidebarOpen && 'justify-center'}`}
+          >
+            <CheckCircle className="w-5 h-5 flex-shrink-0" />
+            <span className={`transition-all duration-300 ease-in-out whitespace-nowrap ${sidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0'} overflow-hidden`}>Harvest Verification</span>
+          </button>
+
+          <button 
+            onClick={() => setCurrentPage('inventory')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+              currentPage === 'inventory' ? 'bg-emerald-600' : 'hover:bg-slate-700'
+            } ${!sidebarOpen && 'justify-center'}`}
+          >
+            <ShoppingCart className="w-5 h-5 flex-shrink-0" />
+            <span className={`transition-all duration-300 ease-in-out whitespace-nowrap ${sidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0'} overflow-hidden`}>Inventory Management</span>
+          </button>
           
+          {/* Super Admin - All Harvests */}
+          {isSuperAdmin && (
+            <button 
+              onClick={() => setCurrentPage('all-harvests')}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                currentPage === 'all-harvests' ? 'bg-purple-600' : 'hover:bg-slate-700'
+              } ${!sidebarOpen && 'justify-center'}`}
+            >
+              <TrendingUp className="w-5 h-5 flex-shrink-0" />
+              <span className={`transition-all duration-300 ease-in-out whitespace-nowrap ${sidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0'} overflow-hidden`}>All Harvests (Admin)</span>
+            </button>
+          )}
+
+          {/* Super Admin - All Inventory */}
+          {isSuperAdmin && (
+            <button 
+              onClick={() => setCurrentPage('all-inventory')}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                currentPage === 'all-inventory' ? 'bg-purple-600' : 'hover:bg-slate-700'
+              } ${!sidebarOpen && 'justify-center'}`}
+            >
+              <BarChart3 className="w-5 h-5 flex-shrink-0" />
+              <span className={`transition-all duration-300 ease-in-out whitespace-nowrap ${sidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0'} overflow-hidden`}>All Inventory (Admin)</span>
+            </button>
+          )}
+
           {/* Content Management - Only for Super Admin */}
           {isSuperAdmin && (
             <button 
@@ -416,6 +464,10 @@ const MAODashboard: React.FC<MAODashboardProps> = ({ onLogout }) => {
                  currentPage === 'seedlings' ? 'Seedling Distribution' :
                  currentPage === 'planting' ? 'Planting Monitor' :
                  currentPage === 'monitoring' ? 'Field Monitoring' :
+                 currentPage === 'harvests' ? 'Harvest Verification' :
+                 currentPage === 'inventory' ? 'Inventory Management' :
+                 currentPage === 'all-harvests' ? 'All Harvests (Super Admin)' :
+                 currentPage === 'all-inventory' ? 'All Inventory (Super Admin)' :
                  currentPage === 'officers' ? 'Officer Management' :
                  currentPage === 'maintenance' ? 'Maintenance Mode' :
                  currentPage === 'content' ? 'Content Management' :
@@ -501,6 +553,14 @@ const MAODashboard: React.FC<MAODashboardProps> = ({ onLogout }) => {
           <PlantingMonitor />
         ) : currentPage === 'monitoring' ? (
           <MonitoringPage />
+        ) : currentPage === 'harvests' ? (
+          <MAOHarvestVerificationPage />
+        ) : currentPage === 'inventory' ? (
+          <MAOInventoryPage />
+        ) : currentPage === 'all-harvests' ? (
+          <SuperAdminHarvestDashboard />
+        ) : currentPage === 'all-inventory' ? (
+          <SuperAdminInventoryDashboard />
         ) : currentPage === 'officers' ? (
           <OfficerManagement />
         ) : currentPage === 'maintenance' ? (

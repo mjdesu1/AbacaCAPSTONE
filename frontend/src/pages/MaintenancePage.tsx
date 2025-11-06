@@ -1,11 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { Wrench, AlertTriangle, RefreshCw, WifiOff, Shield, X, Lock, Mail } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Lock, AlertTriangle, RefreshCw } from 'lucide-react';
+import { completeLogin } from '../utils/authToken';
+import { Wrench, WifiOff, Shield, X, Mail } from 'lucide-react';
 
-interface MaintenancePageProps {
-  onAdminLogin?: () => void;
-}
-
-const MaintenancePage: React.FC<MaintenancePageProps> = ({ onAdminLogin }) => {
+const MaintenancePage: React.FC = () => {
   const [dots, setDots] = useState('');
   const [showAdminButton, setShowAdminButton] = useState(false);
   const [clickCount, setClickCount] = useState(0);
@@ -79,11 +77,13 @@ const MaintenancePage: React.FC<MaintenancePageProps> = ({ onAdminLogin }) => {
         throw new Error('Access denied. Only Super Admins can login during maintenance.');
       }
 
-      // Store tokens and user info
-      localStorage.setItem('accessToken', tokens.accessToken);
-      localStorage.setItem('refreshToken', tokens.refreshToken);
-      localStorage.setItem('userType', 'officer');
-      localStorage.setItem('user', JSON.stringify(userData));
+      // Use centralized token management
+      completeLogin(
+        tokens.accessToken,
+        tokens.refreshToken,
+        userData,
+        'officer'
+      );
 
       console.log('✅ Login successful! Redirecting to MAO Dashboard...');
 
