@@ -66,9 +66,9 @@ export class InventoryController {
 
       // Get MAO name
       const { data: user, error: userError } = await supabase
-        .from('users')
+        .from('association_officers')
         .select('full_name')
-        .eq('user_id', userId)
+        .eq('officer_id', userId)
         .single();
 
       if (userError || !user) {
@@ -445,9 +445,9 @@ export class InventoryController {
 
       // Get distributor name
       const { data: user, error: userError } = await supabase
-        .from('users')
+        .from('association_officers')
         .select('full_name')
-        .eq('user_id', userId)
+        .eq('officer_id', userId)
         .single();
 
       if (userError || !user) {

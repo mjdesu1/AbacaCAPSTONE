@@ -435,11 +435,40 @@ export class HarvestController {
   // MAO ENDPOINTS
   // =====================================================
 
-  // Get all harvests (MAO - sees own verified harvests + pending)
+  // Get all harvests (All officers see all harvests, with filtering options)
   static async getAllHarvests(req: Request, res: Response) {
     try {
       const userId = req.user?.userId;
-      const isSuperAdmin = req.user?.isSuperAdmin;
+      
+      // More robust Super Admin check
+      let isSuperAdmin = req.user?.isSuperAdmin === true;
+      let userPosition = '';
+      
+      // Additional check: if user is officer, check their position in database
+      if (!isSuperAdmin && req.user?.userType === 'officer' && userId) {
+        console.log('🔍 Checking officer details...');
+        const { data: officerData, error: officerError } = await supabase
+          .from('association_officers')
+          .select('position, is_super_admin')
+          .eq('officer_id', userId)
+          .single();
+          
+        if (!officerError && officerData) {
+          console.log('🔍 Officer data:', officerData);
+          userPosition = officerData.position || '';
+          // Check if position indicates Super Admin
+          if (officerData.position && 
+              (officerData.position.includes('System Administrator') || 
+               officerData.position.includes('Admin') ||
+               officerData.is_super_admin)) {
+            isSuperAdmin = true;
+            console.log('👑 User identified as Super Admin by position');
+          }
+        }
+      }
+      
+      console.log('📊 Fetching harvests for user:', userId, 'isSuperAdmin:', isSuperAdmin, 'Position:', userPosition);
+      
       const { status, municipality, barangay, limit = 50, offset = 0 } = req.query;
 
       let query = supabase
@@ -447,33 +476,91 @@ export class HarvestController {
         .select('*')
         .order('harvest_date', { ascending: false });
 
-      // Regular MAO sees: pending harvests OR harvests they verified
-      if (!isSuperAdmin) {
-        query = query.or(`status.eq.Pending Verification,verified_by.eq.${userId}`);
-      }
-      // Super Admin sees all (no filter)
+      // In this system:
+      // - All officers (MAOs, Admins) see all harvests in their area
+      // - Super Admins see everything
+      // - Regular MAOs can apply filters as needed
+      console.log('👥 All officers can see all harvests in the system');
 
-      if (status) {
+      // Apply filters only if they are provided (not empty strings)
+      if (status && status !== 'all') {
+        console.log('🔍 Applying status filter:', status);
         query = query.eq('status', status);
       }
-      if (municipality) {
+      if (municipality && municipality !== '') {
+        console.log('🔍 Applying municipality filter:', municipality);
         query = query.eq('municipality', municipality);
       }
-      if (barangay) {
+      if (barangay && barangay !== '') {
+        console.log('🔍 Applying barangay filter:', barangay);
         query = query.eq('barangay', barangay);
       }
 
       query = query.range(Number(offset), Number(offset) + Number(limit) - 1);
+      
+      console.log('🔍 Final query built');
 
       const { data, error } = await query;
 
       if (error) {
-        console.error('Error fetching all harvests:', error);
+        console.error('❌ Error fetching all harvests:', error);
         res.status(500).json({ error: 'Failed to fetch harvests' });
         return;
       }
 
-      res.status(200).json({ harvests: data || [] });
+      console.log('✅ Found harvests:', data?.length || 0);
+      if (data && data.length > 0) {
+        console.log('📋 First harvest sample:', {
+          id: data[0].harvest_id,
+          farmer: data[0].farmer_name,
+          date: data[0].harvest_date,
+          status: data[0].status,
+          verified_by: data[0].verified_by
+        });
+      } else {
+        // Debug: Let's see what's in the database without filters
+        console.log('🔍 No harvests found with filters, checking all harvests...');
+        const { data: allData, error: allError } = await supabase
+          .from('harvests')
+          .select('*')
+          .limit(5);
+          
+        if (!allError && allData) {
+          console.log('📋 All harvests in database (first 5):', allData.map(h => ({
+            id: h.harvest_id,
+            farmer: h.farmer_name,
+            status: h.status,
+            verified_by: h.verified_by,
+            date: h.harvest_date
+          })));
+        }
+      }
+      
+      // Fetch verifier information separately since there's no FK constraint
+      const harvestsWithVerifiers = await Promise.all(
+        (data || []).map(async (harvest) => {
+          if (harvest.verified_by) {
+            const { data: verifier, error: verifierError } = await supabase
+              .from('association_officers')
+              .select('full_name, email')
+              .eq('officer_id', harvest.verified_by)
+              .single();
+
+            if (!verifierError && verifier) {
+              return {
+                ...harvest,
+                verifier
+              };
+            }
+          }
+          return {
+            ...harvest,
+            verifier: null
+          };
+        })
+      );
+
+      res.status(200).json({ harvests: harvestsWithVerifiers });
     } catch (error) {
       console.error('Error in getAllHarvests:', error);
       res.status(500).json({ error: 'Failed to fetch harvests' });
@@ -483,41 +570,44 @@ export class HarvestController {
   // Get all harvests for Super Admin (sees everything)
   static async getAllHarvestsForSuperAdmin(req: Request, res: Response) {
     try {
-      const isSuperAdmin = req.user?.isSuperAdmin;
+      const userId = req.user?.userId;
+      
+      // More robust Super Admin check
+      let isSuperAdmin = req.user?.isSuperAdmin === true;
+      
+      // Additional check: if user is officer, check their position in database
+      if (!isSuperAdmin && req.user?.userType === 'officer' && userId) {
+        console.log('🔍 Super Admin route - checking if user is Super Admin by position...');
+        const { data: officerData, error: officerError } = await supabase
+          .from('association_officers')
+          .select('position, is_super_admin')
+          .eq('officer_id', userId)
+          .single();
+          
+        if (!officerError && officerData) {
+          console.log('🔍 Officer data in Super Admin route:', officerData);
+          // Check if position indicates Super Admin
+          if (officerData.position && 
+              (officerData.position.includes('System Administrator') || 
+               officerData.position.includes('Admin') ||
+               officerData.is_super_admin)) {
+            isSuperAdmin = true;
+            console.log('👑 User identified as Super Admin by position in Super Admin route');
+          }
+        }
+      }
+      
+      console.log('👑 Super Admin route - User:', userId, 'isSuperAdmin:', isSuperAdmin);
 
       if (!isSuperAdmin) {
+        console.log('❌ Access denied - user is not Super Admin');
         res.status(403).json({ error: 'Access denied. Super Admin only.' });
         return;
       }
 
-      const { status, municipality, barangay, limit = 100, offset = 0 } = req.query;
-
-      let query = supabase
-        .from('harvests')
-        .select('*')
-        .order('harvest_date', { ascending: false });
-
-      if (status) {
-        query = query.eq('status', status);
-      }
-      if (municipality) {
-        query = query.eq('municipality', municipality);
-      }
-      if (barangay) {
-        query = query.eq('barangay', barangay);
-      }
-
-      query = query.range(Number(offset), Number(offset) + Number(limit) - 1);
-
-      const { data, error } = await query;
-
-      if (error) {
-        console.error('Error fetching all harvests for super admin:', error);
-        res.status(500).json({ error: 'Failed to fetch harvests' });
-        return;
-      }
-
-      res.status(200).json({ harvests: data || [] });
+      console.log('✅ Super Admin access granted - fetching all harvests');
+      // Just call the main getAllHarvests function since it now handles super admin role
+      return HarvestController.getAllHarvests(req, res);
     } catch (error) {
       console.error('Error in getAllHarvestsForSuperAdmin:', error);
       res.status(500).json({ error: 'Failed to fetch harvests' });

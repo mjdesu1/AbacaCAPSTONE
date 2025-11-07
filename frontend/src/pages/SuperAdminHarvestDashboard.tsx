@@ -37,11 +37,14 @@ export default function SuperAdminHarvestDashboard() {
     barangay: ''
   });
   const [searchTerm, setSearchTerm] = useState('');
+  
+  console.log('🔄 Component initialized with filters:', filters, 'searchTerm:', searchTerm);
 
   useEffect(() => {
+    console.log('🔄 Filters or searchTerm changed:', filters, 'searchTerm:', searchTerm);
     fetchHarvests();
     fetchStatistics();
-  }, [filters]);
+  }, [filters, searchTerm]);
 
   const fetchHarvests = async () => {
     try {
@@ -55,13 +58,24 @@ export default function SuperAdminHarvestDashboard() {
       const queryString = params.toString();
       const url = `http://localhost:3001/api/harvests/admin/harvests/all${queryString ? '?' + queryString : ''}`;
       
+      console.log('🔍 Fetching harvests from:', url);
+      console.log('🔍 With filters:', filters);
+      
       const response = await fetch(url, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
+      
+      console.log('🔍 Response status:', response.status);
 
       if (response.ok) {
         const data = await response.json();
-        setHarvests(data.harvests);
+        console.log('✅ Received harvests data:', data);
+        console.log('✅ Harvests array length:', data.harvests?.length || 0);
+        setHarvests(data.harvests || []);
+      } else {
+        console.error('❌ Failed to fetch harvests:', response.status, response.statusText);
+        const errorText = await response.text();
+        console.error('❌ Error details:', errorText);
       }
     } catch (error) {
       console.error('Error fetching harvests:', error);
@@ -103,11 +117,27 @@ export default function SuperAdminHarvestDashboard() {
     );
   };
 
-  const filteredHarvests = harvests.filter(harvest =>
-    harvest.farmer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    harvest.municipality.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    harvest.barangay.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredHarvests = harvests.filter(harvest => {
+    // If search term is empty or only whitespace, show all harvests
+    if (!searchTerm || searchTerm.trim() === '') {
+      console.log('🔍 No search term, showing all harvests');
+      return true;
+    }
+    
+    // Apply search filter only when search term is not empty
+    const term = searchTerm.toLowerCase().trim();
+    const matches = (
+      (harvest.farmer_name && harvest.farmer_name.toLowerCase().includes(term)) ||
+      (harvest.municipality && harvest.municipality.toLowerCase().includes(term)) ||
+      (harvest.barangay && harvest.barangay.toLowerCase().includes(term)) ||
+      (harvest.abaca_variety && harvest.abaca_variety.toLowerCase().includes(term))
+    );
+    
+    console.log('🔍 Filtering harvest:', { harvest, term, matches });
+    return matches;
+  });
+  
+  console.log('📊 Filtered harvests count:', filteredHarvests.length, 'Total harvests:', harvests.length);
 
   const exportToCSV = () => {
     const headers = ['Harvest Date', 'Farmer', 'Municipality', 'Barangay', 'Variety', 'Area (ha)', 'Fiber (kg)', 'Grade', 'Status'];

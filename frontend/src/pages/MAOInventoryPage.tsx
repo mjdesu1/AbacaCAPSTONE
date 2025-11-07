@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { Globe, User } from 'lucide-react';
 
 interface InventoryItem {
   inventory_id: string;
   harvest_id: string;
+  mao_name: string;
   stock_weight_kg: number;
   current_stock_kg: number;
   fiber_grade: string;
@@ -24,6 +26,8 @@ interface Statistics {
   total_stock_kg: number;
   total_distributed_kg: number;
   stocked_items: number;
+  total_inventory_value: number;
+  total_maos_managing: number;
 }
 
 export default function MAOInventoryPage() {
@@ -31,18 +35,30 @@ export default function MAOInventoryPage() {
   const [statistics, setStatistics] = useState<Statistics | null>(null);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('Stocked');
+  const [viewMode, setViewMode] = useState<'own' | 'all'>('own');
+  const [searchTerm, setSearchTerm] = useState('');
+  
+  // Get user info from localStorage
+  const userStr = localStorage.getItem('user');
+  const user = userStr ? JSON.parse(userStr) : null;
+  const isSuperAdmin = user?.isSuperAdmin === true;
 
   useEffect(() => {
     fetchInventory();
     fetchStatistics();
-  }, [filter]);
+  }, [filter, viewMode]);
 
   const fetchInventory = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
       const statusParam = filter !== 'all' ? `?status=${encodeURIComponent(filter)}` : '';
       
-      const response = await fetch(`http://localhost:3001/api/inventory/inventory${statusParam}`, {
+      // Use different endpoint based on view mode
+      const endpoint = (isSuperAdmin && viewMode === 'all')
+        ? `http://localhost:3001/api/inventory/admin/inventory/all${statusParam}`
+        : `http://localhost:3001/api/inventory/inventory${statusParam}`;
+      
+      const response = await fetch(endpoint, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -59,7 +75,7 @@ export default function MAOInventoryPage() {
 
   const fetchStatistics = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
       const response = await fetch('http://localhost:3001/api/inventory/inventory/statistics', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -93,18 +109,86 @@ export default function MAOInventoryPage() {
     return ((current / total) * 100).toFixed(0);
   };
 
+  const filteredInventory = inventory.filter(item =>
+    item.harvests?.farmer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.harvests?.municipality.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.storage_location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (item.mao_name && item.mao_name.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
+  const exportToCSV = () => {
+    const headers = ['MAO Officer', 'Farmer', 'Variety', 'Grade', 'Stock (kg)', 'Distributed (kg)', 'Storage', 'Status'];
+    const rows = filteredInventory.map(item => [
+      item.mao_name || 'N/A',
+      item.harvests?.farmer_name || 'N/A',
+      item.harvests?.abaca_variety || 'N/A',
+      item.fiber_grade,
+      item.current_stock_kg,
+      item.total_distributed_kg,
+      item.storage_location || 'N/A',
+      item.status
+    ]);
+
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `inventory_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4">
-        {/* Header */}
+        {/* Header with View Mode Toggle */}
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-green-800">Inventory Management</h1>
-          <button
-            onClick={() => alert('Navigate to Harvest Verification page from sidebar')}
-            className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 font-semibold"
-          >
-            View Verified Harvests
-          </button>
+          <div>
+            <h1 className="text-3xl font-bold text-green-800">Inventory Management</h1>
+            <p className="text-gray-600 mt-1">
+              {viewMode === 'all' ? 'Viewing all system inventory' : 'Viewing your inventory'}
+            </p>
+          </div>
+          <div className="flex gap-3">
+            {isSuperAdmin && (
+              <div className="flex bg-white rounded-lg shadow p-1">
+                <button
+                  onClick={() => setViewMode('own')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-md font-medium transition ${
+                    viewMode === 'own'
+                      ? 'bg-emerald-600 text-white'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  <User className="w-4 h-4" />
+                  My Inventory
+                </button>
+                <button
+                  onClick={() => setViewMode('all')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-md font-medium transition ${
+                    viewMode === 'all'
+                      ? 'bg-purple-600 text-white'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  <Globe className="w-4 h-4" />
+                  All Inventory
+                </button>
+              </div>
+            )}
+            {viewMode === 'all' && (
+              <button
+                onClick={exportToCSV}
+                className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 font-semibold"
+              >
+                📊 Export CSV
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Statistics Cards */}
@@ -123,28 +207,43 @@ export default function MAOInventoryPage() {
               <div className="text-2xl font-bold text-blue-600">{statistics.total_distributed_kg?.toFixed(2)}</div>
             </div>
             <div className="bg-white rounded-lg shadow p-4">
-              <div className="text-sm text-gray-600">Stocked Items</div>
-              <div className="text-2xl font-bold text-green-600">{statistics.stocked_items}</div>
+              <div className="text-sm text-gray-600">{viewMode === 'all' && isSuperAdmin ? 'MAO Officers' : 'Stocked Items'}</div>
+              <div className="text-2xl font-bold text-purple-600">
+                {viewMode === 'all' && isSuperAdmin ? statistics.total_maos_managing : statistics.stocked_items}
+              </div>
             </div>
           </div>
         )}
 
-        {/* Filter Tabs */}
+        {/* Filter Tabs and Search */}
         <div className="bg-white rounded-lg shadow mb-6">
-          <div className="flex border-b overflow-x-auto">
-            {['Stocked', 'Reserved', 'Partially Distributed', 'Fully Distributed', 'all'].map((status) => (
-              <button
-                key={status}
-                onClick={() => setFilter(status)}
-                className={`px-6 py-3 font-medium whitespace-nowrap ${
-                  filter === status
-                    ? 'border-b-2 border-green-600 text-green-600'
-                    : 'text-gray-600 hover:text-green-600'
-                }`}
-              >
-                {status === 'all' ? 'All' : status}
-              </button>
-            ))}
+          <div className="flex items-center justify-between border-b">
+            <div className="flex overflow-x-auto">
+              {['Stocked', 'Reserved', 'Partially Distributed', 'Fully Distributed', 'all'].map((status) => (
+                <button
+                  key={status}
+                  onClick={() => setFilter(status)}
+                  className={`px-6 py-3 font-medium whitespace-nowrap ${
+                    filter === status
+                      ? 'border-b-2 border-green-600 text-green-600'
+                      : 'text-gray-600 hover:text-green-600'
+                  }`}
+                >
+                  {status === 'all' ? 'All' : status}
+                </button>
+              ))}
+            </div>
+            {viewMode === 'all' && (
+              <div className="px-4">
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search MAO, farmer, location..."
+                  className="px-4 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+                />
+              </div>
+            )}
           </div>
         </div>
 
@@ -152,7 +251,7 @@ export default function MAOInventoryPage() {
         <div className="bg-white rounded-lg shadow overflow-hidden">
           {loading ? (
             <div className="p-8 text-center text-gray-500">Loading inventory...</div>
-          ) : inventory.length === 0 ? (
+          ) : filteredInventory.length === 0 ? (
             <div className="p-8 text-center text-gray-500">
               <p className="mb-4">No inventory items found.</p>
               <button
@@ -167,6 +266,9 @@ export default function MAOInventoryPage() {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
+                    {viewMode === 'all' && isSuperAdmin && (
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">MAO Officer</th>
+                    )}
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Farmer</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Variety</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Grade</th>
@@ -177,8 +279,13 @@ export default function MAOInventoryPage() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {inventory.map((item) => (
+                  {filteredInventory.map((item) => (
                     <tr key={item.inventory_id} className="hover:bg-gray-50">
+                      {viewMode === 'all' && isSuperAdmin && (
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          {item.mao_name || 'N/A'}
+                        </td>
+                      )}
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">{item.harvests?.farmer_name}</div>
                         <div className="text-sm text-gray-500">{item.harvests?.municipality}</div>

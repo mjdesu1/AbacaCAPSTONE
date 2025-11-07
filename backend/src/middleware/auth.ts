@@ -32,6 +32,13 @@ export const authenticate = (req: Request, res: Response, next: NextFunction): v
       return;
     }
 
+    console.log('🔐 Authenticated user:', {
+      userId: payload.userId,
+      userType: payload.userType,
+      email: payload.email,
+      isSuperAdmin: payload.isSuperAdmin
+    });
+
     // Attach user information to request object
     req.user = {
       userId: payload.userId,
@@ -160,6 +167,13 @@ export const authorizeRoles = (...allowedRoles: UserType[]) => {
         return;
       }
 
+      console.log('🔐 Authorization check:', {
+        user: req.user.userId,
+        userType: req.user.userType,
+        isSuperAdmin: req.user.isSuperAdmin,
+        allowedRoles: allowedRoles
+      });
+
       // Check if user's role is in allowed roles
       if (!allowedRoles.includes(req.user.userType)) {
         res.status(403).json({
@@ -200,6 +214,11 @@ export const authorizeSuperAdmin = (req: Request, res: Response, next: NextFunct
       });
       return;
     }
+
+    console.log('👑 Super Admin check:', {
+      user: req.user.userId,
+      isSuperAdmin: req.user.isSuperAdmin
+    });
 
     // Check if user has Super Admin flag
     if (!req.user.isSuperAdmin) {
