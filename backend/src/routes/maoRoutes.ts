@@ -39,9 +39,17 @@ router.post('/buyers/:id/verify', UserManagementController.verifyBuyer);
 router.post('/buyers/:id/reject', UserManagementController.rejectBuyer);
 router.delete('/buyers/:id', UserManagementController.deleteBuyer);
 
-// Officer Management Routes
+// User Management Routes - Officers (Self-registered only)
+router.get('/officers/pending', UserManagementController.getOfficers);
+router.get('/officers/:id', UserManagementController.getOfficer);
+router.put('/officers/:id', UserManagementController.updateOfficer);
+router.post('/officers/:id/verify', UserManagementController.verifyOfficer);
+router.post('/officers/:id/reject', UserManagementController.rejectOfficer);
+router.delete('/officers/:id', UserManagementController.deleteOfficer);
+
+// Officer Management Routes (All officers including admin-created)
 router.get('/officers', MAOController.getOfficers);
-router.delete('/officers/:id', MAOController.deleteOfficer);
+router.delete('/officers/admin/:id', MAOController.deleteOfficer);
 
 // Monitoring Routes
 router.get('/monitoring', MAOController.getMonitoringRecords);

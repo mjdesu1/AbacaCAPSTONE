@@ -24,17 +24,18 @@ interface User {
   id: string;
   name: string;
   email: string;
-  type: 'farmer' | 'buyer';
+  type: 'farmer' | 'buyer' | 'officer';
   status: 'pending' | 'verified' | 'rejected';
   association?: string;
   municipality?: string;
   businessName?: string;
   contactNumber?: string;
+  position?: string;
   createdAt: string;
 }
 
 const UserManagement: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'farmers' | 'buyers'>('farmers');
+  const [activeTab, setActiveTab] = useState<'farmers' | 'buyers' | 'officers'>('farmers');
   const [users, setUsers] = useState<User[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -80,9 +81,15 @@ const UserManagement: React.FC = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('accessToken');
-      const endpoint = activeTab === 'farmers' 
-        ? 'http://localhost:3001/api/mao/farmers'
-        : 'http://localhost:3001/api/mao/buyers-list';
+      let endpoint = '';
+      
+      if (activeTab === 'farmers') {
+        endpoint = 'http://localhost:3001/api/mao/farmers';
+      } else if (activeTab === 'buyers') {
+        endpoint = 'http://localhost:3001/api/mao/buyers-list';
+      } else if (activeTab === 'officers') {
+        endpoint = 'http://localhost:3001/api/mao/officers/pending';
+      }
 
       const response = await fetch(endpoint, {
         headers: {
@@ -103,9 +110,15 @@ const UserManagement: React.FC = () => {
     setLoadingDetails(true);
     try {
       const token = localStorage.getItem('accessToken');
-      const endpoint = activeTab === 'farmers'
-        ? `http://localhost:3001/api/mao/farmers/${userId}`
-        : `http://localhost:3001/api/mao/buyers/${userId}`;
+      let endpoint = '';
+      
+      if (activeTab === 'farmers') {
+        endpoint = `http://localhost:3001/api/mao/farmers/${userId}`;
+      } else if (activeTab === 'buyers') {
+        endpoint = `http://localhost:3001/api/mao/buyers/${userId}`;
+      } else if (activeTab === 'officers') {
+        endpoint = `http://localhost:3001/api/mao/officers/${userId}`;
+      }
 
       const response = await fetch(endpoint, {
         headers: {
@@ -127,9 +140,15 @@ const UserManagement: React.FC = () => {
   const handleVerify = async (userId: string) => {
     try {
       const token = localStorage.getItem('accessToken');
-      const endpoint = activeTab === 'farmers'
-        ? `http://localhost:3001/api/mao/farmers/${userId}/verify`
-        : `http://localhost:3001/api/mao/buyers/${userId}/verify`;
+      let endpoint = '';
+      
+      if (activeTab === 'farmers') {
+        endpoint = `http://localhost:3001/api/mao/farmers/${userId}/verify`;
+      } else if (activeTab === 'buyers') {
+        endpoint = `http://localhost:3001/api/mao/buyers/${userId}/verify`;
+      } else if (activeTab === 'officers') {
+        endpoint = `http://localhost:3001/api/mao/officers/${userId}/verify`;
+      }
 
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -156,9 +175,15 @@ const UserManagement: React.FC = () => {
 
     try {
       const token = localStorage.getItem('accessToken');
-      const endpoint = activeTab === 'farmers'
-        ? `http://localhost:3001/api/mao/farmers/${selectedUser.id}/reject`
-        : `http://localhost:3001/api/mao/buyers/${selectedUser.id}/reject`;
+      let endpoint = '';
+      
+      if (activeTab === 'farmers') {
+        endpoint = `http://localhost:3001/api/mao/farmers/${selectedUser.id}/reject`;
+      } else if (activeTab === 'buyers') {
+        endpoint = `http://localhost:3001/api/mao/buyers/${selectedUser.id}/reject`;
+      } else if (activeTab === 'officers') {
+        endpoint = `http://localhost:3001/api/mao/officers/${selectedUser.id}/reject`;
+      }
 
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -189,9 +214,15 @@ const UserManagement: React.FC = () => {
 
     try {
       const token = localStorage.getItem('accessToken');
-      const endpoint = activeTab === 'farmers'
-        ? `http://localhost:3001/api/mao/farmers/${userId}`
-        : `http://localhost:3001/api/mao/buyers/${userId}`;
+      let endpoint = '';
+      
+      if (activeTab === 'farmers') {
+        endpoint = `http://localhost:3001/api/mao/farmers/${userId}`;
+      } else if (activeTab === 'buyers') {
+        endpoint = `http://localhost:3001/api/mao/buyers/${userId}`;
+      } else if (activeTab === 'officers') {
+        endpoint = `http://localhost:3001/api/mao/officers/${userId}`;
+      }
 
       const response = await fetch(endpoint, {
         method: 'DELETE',
@@ -255,9 +286,14 @@ const UserManagement: React.FC = () => {
     }
 
     // Prepare CSV headers
-    const headers = activeTab === 'farmers'
-      ? ['Name', 'Email', 'Contact Number', 'Association', 'Municipality', 'Status', 'Date Registered']
-      : ['Name', 'Email', 'Contact Number', 'Business Name', 'Business Address', 'Status', 'Date Registered'];
+    let headers: string[] = [];
+    if (activeTab === 'farmers') {
+      headers = ['Name', 'Email', 'Contact Number', 'Organization', 'Municipality', 'Status', 'Date Registered'];
+    } else if (activeTab === 'buyers') {
+      headers = ['Name', 'Email', 'Contact Number', 'Business Name', 'Business Address', 'Status', 'Date Registered'];
+    } else if (activeTab === 'officers') {
+      headers = ['Name', 'Email', 'Contact Number', 'Organization', 'Position', 'Status', 'Date Registered'];
+    }
 
     // Prepare CSV rows
     const rows = filteredUsers.map(user => {
@@ -271,13 +307,23 @@ const UserManagement: React.FC = () => {
           user.status,
           new Date(user.createdAt).toLocaleDateString()
         ];
-      } else {
+      } else if (activeTab === 'buyers') {
         return [
           user.name,
           user.email,
           user.contactNumber || 'N/A',
           user.businessName || 'N/A',
           'N/A', // business address not in list view
+          user.status,
+          new Date(user.createdAt).toLocaleDateString()
+        ];
+      } else {
+        return [
+          user.name,
+          user.email,
+          user.contactNumber || 'N/A',
+          user.association || 'N/A',
+          user.position || 'N/A',
           user.status,
           new Date(user.createdAt).toLocaleDateString()
         ];
@@ -339,6 +385,24 @@ const UserManagement: React.FC = () => {
           </div>
           <span>Buyers</span>
           {activeTab === 'buyers' && (
+            <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1/2 h-1 bg-white rounded-full"></div>
+          )}
+        </button>
+        <button
+          onClick={() => setActiveTab('officers')}
+          className={`group relative flex items-center justify-center gap-2 sm:gap-3 px-4 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl font-semibold transition-all duration-300 text-sm sm:text-base ${
+            activeTab === 'officers'
+              ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-xl shadow-purple-500/50 scale-105'
+              : 'bg-white/80 backdrop-blur-sm text-gray-600 hover:bg-white hover:shadow-lg border border-gray-200'
+          }`}
+        >
+          <div className={`p-2 rounded-lg transition-colors ${
+            activeTab === 'officers' ? 'bg-white/20' : 'bg-purple-50 group-hover:bg-purple-100'
+          }`}>
+            <Building2 className="w-5 h-5" />
+          </div>
+          <span>Officers</span>
+          {activeTab === 'officers' && (
             <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1/2 h-1 bg-white rounded-full"></div>
           )}
         </button>
@@ -419,7 +483,7 @@ const UserManagement: React.FC = () => {
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 group-focus-within:text-emerald-500 transition-colors" />
               <input
                 type="text"
-                placeholder="Search by name, email, association..."
+                placeholder="Search by name, email, organization..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white transition-all duration-200 placeholder:text-gray-400"
@@ -494,7 +558,7 @@ const UserManagement: React.FC = () => {
                   <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                     <div className="flex items-center gap-2">
                       <Building2 className="w-4 h-4" />
-                      {activeTab === 'farmers' ? 'Association' : 'Business'}
+                      {activeTab === 'farmers' ? 'Organization' : activeTab === 'buyers' ? 'Business' : 'Organization'}
                     </div>
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
@@ -533,8 +597,11 @@ const UserManagement: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 text-sm">
                       <div className="font-medium text-gray-900">
-                        {activeTab === 'farmers' ? user.association : user.businessName}
+                        {activeTab === 'farmers' ? user.association : activeTab === 'buyers' ? user.businessName : user.association}
                       </div>
+                      {activeTab === 'officers' && user.position && (
+                        <div className="text-xs text-gray-500">{user.position}</div>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-3 py-1 rounded-full text-xs font-medium ${
@@ -807,7 +874,7 @@ const UserManagement: React.FC = () => {
                     {activeTab === 'farmers' ? (
                       <>
                         <div className="bg-white p-4 rounded-lg shadow-sm">
-                          <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Association Name</p>
+                          <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Organization Name</p>
                           <p className="font-semibold text-gray-900">{selectedUserDetails.association_name || 'Not provided'}</p>
                         </div>
                         <div className="bg-white p-4 rounded-lg shadow-sm">
@@ -1106,7 +1173,7 @@ const UserManagement: React.FC = () => {
                       {activeTab === 'farmers' ? (
                         <>
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Association Name</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Organization Name</label>
                             <input
                               type="text"
                               value={editFormData.association_name || ''}

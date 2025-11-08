@@ -290,12 +290,15 @@ router.post(
 
 /**
  * @route   POST /api/auth/register/officer
- * @desc    Register a new association officer (ADMIN ONLY - Not public)
- * @access  Private (Admin/MAO only)
- * @note    Officers cannot self-register. Only existing admin can create officer accounts.
+ * @desc    Register a new association officer (Public with admin approval)
+ * @access  Public (requires admin verification after registration)
  */
-// REMOVED: Public officer registration
-// Officers are created by admin through the admin panel after login
+router.post(
+  '/register/officer',
+  registrationRateLimiter,
+  officerRegistrationValidation,
+  AuthController.registerOfficer
+);
 
 /**
  * @route   POST /api/auth/login

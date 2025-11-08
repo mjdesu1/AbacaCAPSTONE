@@ -152,20 +152,20 @@ const ProfileCompletion: React.FC<ProfileCompletionProps> = ({ onComplete }) => 
               />
             </div>
 
-            {/* Association Name */}
+            {/* Organization Name */}
             <div>
               <label className="flex items-center text-xs font-bold text-gray-600 mb-3 uppercase tracking-wide">
                 <div className="p-2 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg mr-2">
                   <Users className="w-4 h-4 text-white" />
                 </div>
-                Association Name
+                Organization Name
               </label>
               <input
                 type="text"
                 name="associationName"
                 value={formData.associationName}
                 onChange={handleChange}
-                placeholder="CuSAFA, ABACA Farmers Association, etc."
+                placeholder="CuSAFA, ABACA Farmers Organization, etc."
                 className="w-full px-5 py-4 bg-gray-50 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all font-medium text-gray-800"
                 required
               />

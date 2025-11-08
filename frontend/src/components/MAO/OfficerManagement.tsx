@@ -344,7 +344,7 @@ const OfficerManagement: React.FC = () => {
                     Position
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Association
+                    Organization
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
@@ -521,7 +521,7 @@ const OfficerManagement: React.FC = () => {
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="p-3 bg-gray-50 rounded-lg">
-                    <p className="text-xs text-gray-500">Association</p>
+                    <p className="text-xs text-gray-500">Organization</p>
                     <p className="text-sm font-medium text-gray-800">{selectedOfficer.association_name || 'N/A'}</p>
                   </div>
                   <div className="p-3 bg-gray-50 rounded-lg">
@@ -659,7 +659,7 @@ const OfficerManagement: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Association Name</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Organization Name</label>
                 <input
                   type="text"
                   value={editFormData.association_name || ''}

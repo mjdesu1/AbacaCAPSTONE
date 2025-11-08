@@ -25,7 +25,7 @@ interface MAOStaff {
   image: string;
 }
 
-type UserRole = 'farmer' | 'buyer' | 'officer';
+type UserRole = 'farmer' | 'buyer' | 'officer' | 'cusafa';
 
 interface HomePageProps {
   onLoginClick: (role: UserRole) => void;
@@ -323,6 +323,9 @@ const HomePage: React.FC<HomePageProps> = ({ onLoginClick }) => {
               <button onClick={() => onLoginClick('farmer')} className="px-5 py-2.5 bg-white text-teal-700 border-2 border-teal-500 rounded-lg hover:bg-teal-50 transition-all font-semibold text-sm">
                 Farmer Login
               </button>
+              <button onClick={() => onLoginClick('cusafa')} className="px-5 py-2.5 bg-white text-blue-700 border-2 border-blue-500 rounded-lg hover:bg-blue-50 transition-all font-semibold text-sm">
+                CUSAFA Login
+              </button>
             </div>
 
             {/* Mobile Menu Button */}
@@ -349,6 +352,9 @@ const HomePage: React.FC<HomePageProps> = ({ onLoginClick }) => {
               </button>
               <button onClick={() => onLoginClick('farmer')} className="w-full px-4 py-3 bg-white text-teal-700 border-2 border-teal-500 rounded-xl hover:bg-teal-50 transition-all font-medium">
                 Farmer Login
+              </button>
+              <button onClick={() => onLoginClick('cusafa')} className="w-full px-4 py-3 bg-white text-blue-700 border-2 border-blue-500 rounded-xl hover:bg-blue-50 transition-all font-medium">
+                CUSAFA Login
               </button>
             </div>
           )}

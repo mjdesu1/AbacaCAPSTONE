@@ -4,7 +4,8 @@ import {
   CheckCircle, 
   XCircle, 
   Eye, 
-  Package, 
+  Trash2,
+  Package,
   Users as UsersIcon,
   Calendar,
   Sprout,
@@ -143,13 +144,6 @@ export default function MAOHarvestVerificationPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showViewModal, setShowViewModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [showInventoryModal, setShowInventoryModal] = useState(false);
-  const [selectedForInventory, setSelectedForInventory] = useState<Harvest | null>(null);
-  const [inventoryFormData, setInventoryFormData] = useState({
-    storage_location: '',
-    fiber_quality_rating: 'Good',
-    notes: ''
-  });
   const [editFormData, setEditFormData] = useState({
     harvest_date: '',
     abaca_variety: '',
@@ -267,46 +261,30 @@ export default function MAOHarvestVerificationPage() {
     }
   };
 
-  const handleAddToInventoryClick = (harvest: Harvest) => {
-    setSelectedForInventory(harvest);
-    setInventoryFormData({
-      storage_location: '',
-      fiber_quality_rating: 'Good',
-      notes: ''
-    });
-    setShowInventoryModal(true);
-  };
-
-  const handleSubmitInventory = async () => {
-    if (!selectedForInventory) return;
+  const handleDelete = async (harvestId: string) => {
+    if (!confirm('Are you sure you want to delete this harvest record? This action cannot be undone.')) {
+      return;
+    }
 
     try {
       const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/inventory/inventory', {
-        method: 'POST',
+      const response = await fetch(`http://localhost:3001/api/harvests/${harvestId}`, {
+        method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          harvest_id: selectedForInventory.harvest_id,
-          storage_location: inventoryFormData.storage_location,
-          fiber_quality_rating: inventoryFormData.fiber_quality_rating,
-          notes: inventoryFormData.notes
-        })
+        }
       });
 
       if (response.ok) {
-        alert('✅ Harvest added to inventory successfully!');
-        setShowInventoryModal(false);
+        alert('✅ Harvest record deleted successfully!');
         fetchHarvests(); // Refresh the list
       } else {
         const error = await response.json();
-        alert(`❌ Error: ${error.error || 'Failed to add to inventory'}`);
+        alert(`❌ Error: ${error.error || 'Failed to delete harvest'}`);
       }
     } catch (error) {
-      console.error('Error adding to inventory:', error);
-      alert('❌ Failed to add to inventory');
+      console.error('Error deleting harvest:', error);
+      alert('❌ Failed to delete harvest');
     }
   };
 
@@ -601,16 +579,14 @@ export default function MAOHarvestVerificationPage() {
                               </button>
                             </>
                           )}
-                          {harvest.status === 'Verified' && (
-                            <button
-                              onClick={() => handleAddToInventoryClick(harvest)}
-                              className="flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all duration-200 hover:scale-105 shadow-md text-sm font-semibold ml-1"
-                              title="Add to Inventory"
-                            >
-                              <Package className="w-4 h-4" />
-                              <span className="hidden xl:inline">Add to Inventory</span>
-                            </button>
-                          )}
+                          <button
+                            onClick={() => handleDelete(harvest.harvest_id)}
+                            className="flex items-center gap-1.5 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-200 hover:scale-105 shadow-md text-sm font-semibold ml-1"
+                            title="Delete"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                            <span className="hidden xl:inline">Delete</span>
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -639,22 +615,16 @@ export default function MAOHarvestVerificationPage() {
               </div>
               
               <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4 mb-6 space-y-2">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 mb-2">
                   <UsersIcon className="w-4 h-4 text-gray-600" />
                   <span className="text-sm text-gray-600">Farmer:</span>
                   <span className="font-semibold text-gray-900">{selectedHarvest.farmer_name}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-gray-600" />
-                  <span className="text-sm text-gray-600">Date:</span>
-                  <span className="font-semibold text-gray-900">
-                    {new Date(selectedHarvest.harvest_date).toLocaleDateString()}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
                   <Package className="w-4 h-4 text-gray-600" />
-                  <span className="text-sm text-gray-600">Fiber Output:</span>
+                  <span className="text-sm text-gray-600">Fiber:</span>
                   <span className="font-semibold text-gray-900">{selectedHarvest.dry_fiber_output_kg} kg</span>
+                  <span className="text-sm text-gray-600">({selectedHarvest.fiber_grade})</span>
                 </div>
               </div>
               
@@ -980,18 +950,6 @@ export default function MAOHarvestVerificationPage() {
               </div>
               
               <div className="mt-6 flex justify-end gap-3">
-                {selectedHarvest.status === 'Verified' && (
-                  <button
-                    onClick={() => {
-                      setShowViewModal(false);
-                      handleAddToInventoryClick(selectedHarvest);
-                    }}
-                    className="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:from-purple-700 hover:to-indigo-700 font-semibold transition-all shadow-lg flex items-center gap-2"
-                  >
-                    <Package className="w-5 h-5" />
-                    Add to Inventory
-                  </button>
-                )}
                 <button
                   onClick={() => setShowViewModal(false)}
                   className="px-6 py-3 bg-gradient-to-r from-gray-600 to-slate-600 text-white rounded-xl hover:from-gray-700 hover:to-slate-700 font-semibold transition-all shadow-lg"
@@ -1106,95 +1064,6 @@ export default function MAOHarvestVerificationPage() {
                 Cancel
               </button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Add to Inventory Modal */}
-      {showInventoryModal && selectedForInventory && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 max-w-lg w-full">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-3 bg-gradient-to-br from-purple-100 to-indigo-100 rounded-xl">
-                  <Package className="w-6 h-6 text-purple-600" />
-                </div>
-                <h2 className="text-2xl font-bold text-gray-900">Add to Inventory</h2>
-              </div>
-              
-              <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4 mb-6">
-                <div className="flex items-center gap-2 mb-2">
-                  <UsersIcon className="w-4 h-4 text-gray-600" />
-                  <span className="text-sm text-gray-600">Farmer:</span>
-                  <span className="font-semibold text-gray-900">{selectedForInventory.farmer_name}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Package className="w-4 h-4 text-gray-600" />
-                  <span className="text-sm text-gray-600">Fiber:</span>
-                  <span className="font-semibold text-gray-900">{selectedForInventory.dry_fiber_output_kg} kg</span>
-                  <span className="text-sm text-gray-600">({selectedForInventory.fiber_grade})</span>
-                </div>
-              </div>
-              
-              <div className="space-y-4 mb-6">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Storage Location <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={inventoryFormData.storage_location}
-                    onChange={(e) => setInventoryFormData({ ...inventoryFormData, storage_location: e.target.value })}
-                    placeholder="e.g., Warehouse A, Section 2"
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Fiber Quality Rating
-                  </label>
-                  <select
-                    value={inventoryFormData.fiber_quality_rating}
-                    onChange={(e) => setInventoryFormData({ ...inventoryFormData, fiber_quality_rating: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
-                  >
-                    <option value="Excellent">Excellent</option>
-                    <option value="Good">Good</option>
-                    <option value="Fair">Fair</option>
-                    <option value="Poor">Poor</option>
-                  </select>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Notes (Optional)
-                  </label>
-                  <textarea
-                    value={inventoryFormData.notes}
-                    onChange={(e) => setInventoryFormData({ ...inventoryFormData, notes: e.target.value })}
-                    rows={3}
-                    placeholder="Additional notes about this inventory item..."
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
-                  />
-                </div>
-              </div>
-              
-              <div className="flex gap-3">
-                <button
-                  onClick={handleSubmitInventory}
-                  disabled={!inventoryFormData.storage_location.trim()}
-                  className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:from-purple-700 hover:to-indigo-700 font-semibold transition-all duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
-                >
-                  ✓ Add to Inventory
-                </button>
-                <button
-                  onClick={() => setShowInventoryModal(false)}
-                  className="px-6 py-3 border-2 border-gray-300 rounded-xl hover:bg-gray-50 font-semibold transition-all"
-                >
-                  Cancel
-                </button>
-              </div>
           </div>
         </div>
       )}

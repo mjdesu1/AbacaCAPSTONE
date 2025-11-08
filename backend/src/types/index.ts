@@ -177,10 +177,12 @@ export interface OfficerRegistration {
   fullName: string;
   email: string;
   password: string;
-  profilePicture?: string; // Optional profile picture URL
+  profilePicture?: string; // Optional profile picture URL (admin-created)
+  profilePhoto?: string; // Optional profile photo base64 (public registration)
+  validIdPhoto?: string; // Optional valid ID photo base64 (public registration)
   isSuperAdmin?: boolean; // Super Admin flag (default: false)
   
-  // Profile Information (Filled after first login)
+  // Profile Information (Filled after first login or during public registration)
   position?: string;
   associationName?: string;
   contactNumber?: string;
@@ -207,6 +209,10 @@ export interface AssociationOfficer extends Omit<OfficerRegistration, 'password'
   isVerified: boolean;
   isSuperAdmin?: boolean; // Super Admin flag
   profileCompleted?: boolean; // True after first login profile fillup
+  verificationStatus?: 'pending' | 'verified' | 'rejected'; // Verification status
+  verifiedBy?: string; // Officer ID who verified
+  verifiedAt?: string; // Verification timestamp
+  rejectionReason?: string; // Reason if rejected
   createdAt: string;
   updatedAt: string;
   lastLogin?: string;

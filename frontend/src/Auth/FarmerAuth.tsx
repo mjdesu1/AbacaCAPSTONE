@@ -391,7 +391,7 @@ export const FarmerAuth: React.FC<FarmerAuthProps> = ({ onBack, onLoginSuccess }
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Association Name</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Organization Name</label>
                     <input
                       type="text"
                       value={formData.associationName || ''}

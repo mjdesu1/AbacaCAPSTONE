@@ -29,12 +29,10 @@ import UserManagement from './UserManagement';
 import OfficerManagement from './OfficerManagement';
 import MaintenanceToggle from './MaintenanceToggle';
 import SeedlingManagement from './SeedlingManagement';
-import PlantingMonitor from './PlantingMonitor';
 import MonitoringPage from '../../pages/MonitoringPage';
 import ArticleManagement from './ArticleManagement';
 import TeamManagement from './TeamManagement';
 import MAOHarvestVerificationPage from '../../pages/MAOHarvestVerificationPage';
-import MAOInventoryPage from '../../pages/MAOInventoryPage';
 
 interface MAODashboardProps {
   onLogout: () => void;
@@ -43,7 +41,7 @@ interface MAODashboardProps {
 const MAODashboard: React.FC<MAODashboardProps> = ({ onLogout }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useState<'farmers' | 'buyers'>('farmers');
-  const [currentPage, setCurrentPage] = useState<'dashboard' | 'users' | 'officers' | 'maintenance' | 'seedlings' | 'planting' | 'monitoring' | 'content' | 'harvests' | 'inventory'>('dashboard');
+  const [currentPage, setCurrentPage] = useState<'dashboard' | 'users' | 'officers' | 'maintenance' | 'seedlings' | 'monitoring' | 'content' | 'harvests'>('dashboard');
   const [contentTab, setContentTab] = useState<'articles' | 'team'>('articles');
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -328,16 +326,6 @@ const MAODashboard: React.FC<MAODashboardProps> = ({ onLogout }) => {
           </button>
 
           <button 
-            onClick={() => setCurrentPage('planting')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
-              currentPage === 'planting' ? 'bg-emerald-600' : 'hover:bg-slate-700'
-            } ${!sidebarOpen && 'justify-center'}`}
-          >
-            <CheckCircle className="w-5 h-5 flex-shrink-0" />
-            <span className={`transition-all duration-300 ease-in-out whitespace-nowrap ${sidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0'} overflow-hidden`}>Planted</span>
-          </button>
-
-          <button 
             onClick={() => setCurrentPage('monitoring')}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
               currentPage === 'monitoring' ? 'bg-emerald-600' : 'hover:bg-slate-700'
@@ -355,16 +343,6 @@ const MAODashboard: React.FC<MAODashboardProps> = ({ onLogout }) => {
           >
             <CheckCircle className="w-5 h-5 flex-shrink-0" />
             <span className={`transition-all duration-300 ease-in-out whitespace-nowrap ${sidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0'} overflow-hidden`}>Harvest Verification</span>
-          </button>
-
-          <button 
-            onClick={() => setCurrentPage('inventory')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
-              currentPage === 'inventory' ? 'bg-emerald-600' : 'hover:bg-slate-700'
-            } ${!sidebarOpen && 'justify-center'}`}
-          >
-            <ShoppingCart className="w-5 h-5 flex-shrink-0" />
-            <span className={`transition-all duration-300 ease-in-out whitespace-nowrap ${sidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0'} overflow-hidden`}>Inventory Management</span>
           </button>
 
           {/* Content Management - Only for Super Admin */}
@@ -434,10 +412,8 @@ const MAODashboard: React.FC<MAODashboardProps> = ({ onLogout }) => {
                 {currentPage === 'dashboard' ? 'Dashboard' :
                  currentPage === 'users' ? 'User Management' :
                  currentPage === 'seedlings' ? 'Seedling Distribution' :
-                 currentPage === 'planting' ? 'Planting Monitor' :
                  currentPage === 'monitoring' ? 'Field Monitoring' :
                  currentPage === 'harvests' ? 'Harvest Management' :
-                 currentPage === 'inventory' ? 'Inventory Management' :
                  currentPage === 'officers' ? 'Officer Management' :
                  currentPage === 'maintenance' ? 'Maintenance Mode' :
                  currentPage === 'content' ? 'Content Management' :
@@ -519,14 +495,10 @@ const MAODashboard: React.FC<MAODashboardProps> = ({ onLogout }) => {
           <UserManagement />
         ) : currentPage === 'seedlings' ? (
           <SeedlingManagement />
-        ) : currentPage === 'planting' ? (
-          <PlantingMonitor />
         ) : currentPage === 'monitoring' ? (
           <MonitoringPage />
         ) : currentPage === 'harvests' ? (
           <MAOHarvestVerificationPage />
-        ) : currentPage === 'inventory' ? (
-          <MAOInventoryPage />
         ) : currentPage === 'officers' ? (
           <OfficerManagement />
         ) : currentPage === 'maintenance' ? (

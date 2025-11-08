@@ -333,4 +333,165 @@ export class UserManagementController {
       res.status(500).json({ error: 'Failed to delete buyer' });
     }
   }
+
+  // =====================================================
+  // OFFICER MANAGEMENT (Self-registered officers only)
+  // =====================================================
+
+  // Get all officers (only self-registered with profile_completed = true)
+  static async getOfficers(req: Request, res: Response) {
+    try {
+      const { data, error } = await supabase
+        .from('association_officers')
+        .select('*')
+        .eq('profile_completed', true) // Only self-registered officers
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      // Map to frontend format
+      const officers = data.map(officer => ({
+        id: officer.officer_id,
+        name: officer.full_name,
+        email: officer.email,
+        type: 'officer',
+        status: officer.verification_status || (officer.is_verified ? 'verified' : 'pending'),
+        association: officer.association_name,
+        position: officer.position,
+        contactNumber: officer.contact_number,
+        createdAt: officer.created_at,
+      }));
+
+      res.status(200).json(officers);
+    } catch (error) {
+      console.error('Error fetching officers:', error);
+      res.status(500).json({ error: 'Failed to fetch officers' });
+    }
+  }
+
+  // Get single officer
+  static async getOfficer(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+
+      const { data, error } = await supabase
+        .from('association_officers')
+        .select('*')
+        .eq('officer_id', id)
+        .single();
+
+      if (error) throw error;
+
+      res.status(200).json(data);
+    } catch (error) {
+      console.error('Error fetching officer:', error);
+      res.status(500).json({ error: 'Failed to fetch officer' });
+    }
+  }
+
+  // Update officer
+  static async updateOfficer(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const updates = req.body;
+
+      const { data, error } = await supabase
+        .from('association_officers')
+        .update({
+          ...updates,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('officer_id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      res.status(200).json(data);
+    } catch (error) {
+      console.error('Error updating officer:', error);
+      res.status(500).json({ error: 'Failed to update officer' });
+    }
+  }
+
+  // Verify officer
+  static async verifyOfficer(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const verifier = (req as any).user;
+
+      const { data, error } = await supabase
+        .from('association_officers')
+        .update({
+          is_verified: true,
+          verification_status: 'verified',
+          verified_by: verifier.userId,
+          verified_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq('officer_id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      res.status(200).json({ message: 'Officer verified successfully', data });
+    } catch (error) {
+      console.error('Error verifying officer:', error);
+      res.status(500).json({ error: 'Failed to verify officer' });
+    }
+  }
+
+  // Reject officer
+  static async rejectOfficer(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const { reason } = req.body;
+      const verifier = (req as any).user;
+
+      if (!reason) {
+        return res.status(400).json({ error: 'Rejection reason is required' });
+      }
+
+      const { data, error } = await supabase
+        .from('association_officers')
+        .update({
+          is_verified: false,
+          verification_status: 'rejected',
+          rejection_reason: reason,
+          verified_by: verifier.userId,
+          verified_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq('officer_id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      res.status(200).json({ message: 'Officer rejected successfully', data });
+    } catch (error) {
+      console.error('Error rejecting officer:', error);
+      res.status(500).json({ error: 'Failed to reject officer' });
+    }
+  }
+
+  // Delete officer
+  static async deleteOfficer(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+
+      const { error } = await supabase
+        .from('association_officers')
+        .delete()
+        .eq('officer_id', id);
+
+      if (error) throw error;
+
+      res.status(200).json({ message: 'Officer deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting officer:', error);
+      res.status(500).json({ error: 'Failed to delete officer' });
+    }
+  }
 }

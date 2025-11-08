@@ -1,15 +1,15 @@
 import React from 'react';
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
 import { HomePage } from './pages';
-import { FarmerAuth, BuyerAuth, OfficerAuth } from './Auth';
+import { FarmerAuth, BuyerAuth, OfficerAuth, CUSAFAAuth } from './Auth';
 import MAOComponent from './components/MAO/MAOComponent';
 import FarmersComponent from './components/Farmers/FarmersComponent';
 import MaintenanceChecker from './components/MaintenanceChecker';
 
 const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY || '';
 
-type UserRole = 'farmer' | 'buyer' | 'officer';
-type PageType = 'home' | 'farmerAuth' | 'buyerAuth' | 'officerAuth';
+type UserRole = 'farmer' | 'buyer' | 'officer' | 'cusafa';
+type PageType = 'home' | 'farmerAuth' | 'buyerAuth' | 'officerAuth' | 'cusafaAuth';
 
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = React.useState<PageType>('home');
@@ -47,6 +47,8 @@ const App: React.FC = () => {
       setCurrentPage('buyerAuth');
     } else if (role === 'officer') {
       setCurrentPage('officerAuth');
+    } else if (role === 'cusafa') {
+      setCurrentPage('cusafaAuth');
     }
   };
 
@@ -91,6 +93,10 @@ const App: React.FC = () => {
 
           {currentPage === 'officerAuth' && !showAuthenticatedView && (
             <OfficerAuth onBack={handleBackToHome} onLoginSuccess={() => handleLoginSuccess('officer')} />
+          )}
+
+          {currentPage === 'cusafaAuth' && !showAuthenticatedView && (
+            <CUSAFAAuth onBack={handleBackToHome} onLoginSuccess={() => handleLoginSuccess('officer')} />
           )}
 
           {isAuthenticated && showAuthenticatedView && (

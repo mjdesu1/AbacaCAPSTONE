@@ -296,20 +296,29 @@ export class AuthService {
       // If isSuperAdmin flag is set, mark profile as completed and set super admin privileges
       const isSuperAdmin = data.isSuperAdmin === true;
       
+      // Determine if this is a public registration (has position, associationName, etc.)
+      const isPublicRegistration = data.position && data.associationName;
+      
       const { data: officer, error } = await supabase
         .from('association_officers')
         .insert({
           full_name: data.fullName,
           email: data.email,
           password_hash: passwordHash,
-          profile_picture: data.profilePicture || null, // Optional profile picture
-          is_super_admin: isSuperAdmin, // Super Admin flag
-          // Profile fields - only set for super admin accounts
-          position: isSuperAdmin ? 'System Administrator' : null,
-          association_name: isSuperAdmin ? 'MAO Culiram' : null,
-          profile_completed: isSuperAdmin ? true : false, // Super Admins skip profile completion
+          profile_picture: data.profilePhoto || data.profilePicture || null,
+          valid_id_photo: data.validIdPhoto || null,
+          is_super_admin: isSuperAdmin,
+          // Profile fields - set for public registration or super admin
+          position: data.position || (isSuperAdmin ? 'System Administrator' : null),
+          association_name: data.associationName || (isSuperAdmin ? 'MAO Culiram' : null),
+          contact_number: data.contactNumber || null,
+          address: data.address || null,
+          term_duration: data.termDuration || null,
+          profile_completed: isSuperAdmin ? true : isPublicRegistration,
           is_active: true,
-          is_verified: true, // Auto-verified since created by MAO admin
+          // Verification status: pending for public registration, verified for admin-created
+          verification_status: isPublicRegistration ? 'pending' : 'verified',
+          is_verified: isPublicRegistration ? false : true,
         })
         .select()
         .single();
@@ -403,8 +412,8 @@ export class AuthService {
         throw new Error('Account is inactive');
       }
 
-      // Check if farmer/buyer is verified (officers don't need verification)
-      if ((userType === 'farmer' || userType === 'buyer') && !user.is_verified) {
+      // Check if user is verified (farmers, buyers, and officers need verification)
+      if (!user.is_verified) {
         await this.logAuthEvent(
           userId,
           userType,

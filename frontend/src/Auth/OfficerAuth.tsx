@@ -49,6 +49,19 @@ export const OfficerAuth: React.FC<OfficerAuthProps> = ({ onBack, onLoginSuccess
         throw new Error(data.error || 'Login failed');
       }
 
+      // Check if officer is verified
+      if (data.data.user.verification_status === 'pending') {
+        setError('Your account is pending verification by an administrator. Please wait for approval.');
+        setLoading(false);
+        return;
+      }
+
+      if (data.data.user.verification_status === 'rejected') {
+        setError('Your account has been rejected. Reason: ' + (data.data.user.rejection_reason || 'Not specified'));
+        setLoading(false);
+        return;
+      }
+
       // Use centralized token management
       completeLogin(
         data.data.tokens.accessToken,
