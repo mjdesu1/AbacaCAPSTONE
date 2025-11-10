@@ -374,7 +374,7 @@ export class AuthController {
       // Fetch fresh data from database based on user type
       if (payload.userType === 'officer') {
         const { data: officer, error } = await supabase
-          .from('association_officers')
+          .from('organization')
           .select('*')
           .eq('officer_id', payload.userId)
           .single();

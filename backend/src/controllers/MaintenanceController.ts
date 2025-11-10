@@ -99,7 +99,7 @@ export class MaintenanceController {
           ip_address,
           created_at,
           enabled_by,
-          association_officers!maintenance_logs_enabled_by_fkey (
+          organization!maintenance_logs_enabled_by_fkey (
             full_name,
             email
           )

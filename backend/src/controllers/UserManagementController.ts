@@ -342,7 +342,7 @@ export class UserManagementController {
   static async getOfficers(req: Request, res: Response) {
     try {
       const { data, error } = await supabase
-        .from('association_officers')
+        .from('organization')
         .select('*')
         .eq('profile_completed', true) // Only self-registered officers
         .order('created_at', { ascending: false });
@@ -356,7 +356,9 @@ export class UserManagementController {
         email: officer.email,
         type: 'officer',
         status: officer.verification_status || (officer.is_verified ? 'verified' : 'pending'),
-        association: officer.association_name,
+        officeName: officer.office_name,
+        assignedMunicipality: officer.assigned_municipality,
+        assignedBarangay: officer.assigned_barangay,
         position: officer.position,
         contactNumber: officer.contact_number,
         createdAt: officer.created_at,
@@ -375,7 +377,7 @@ export class UserManagementController {
       const { id } = req.params;
 
       const { data, error } = await supabase
-        .from('association_officers')
+        .from('organization')
         .select('*')
         .eq('officer_id', id)
         .single();
@@ -396,7 +398,7 @@ export class UserManagementController {
       const updates = req.body;
 
       const { data, error } = await supabase
-        .from('association_officers')
+        .from('organization')
         .update({
           ...updates,
           updated_at: new Date().toISOString(),
@@ -421,7 +423,7 @@ export class UserManagementController {
       const verifier = (req as any).user;
 
       const { data, error } = await supabase
-        .from('association_officers')
+        .from('organization')
         .update({
           is_verified: true,
           verification_status: 'verified',
@@ -454,7 +456,7 @@ export class UserManagementController {
       }
 
       const { data, error } = await supabase
-        .from('association_officers')
+        .from('organization')
         .update({
           is_verified: false,
           verification_status: 'rejected',
@@ -482,7 +484,7 @@ export class UserManagementController {
       const { id } = req.params;
 
       const { error } = await supabase
-        .from('association_officers')
+        .from('organization')
         .delete()
         .eq('officer_id', id);
 

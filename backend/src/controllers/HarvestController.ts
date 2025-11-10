@@ -448,7 +448,7 @@ export class HarvestController {
       if (!isSuperAdmin && req.user?.userType === 'officer' && userId) {
         console.log('🔍 Checking officer details...');
         const { data: officerData, error: officerError } = await supabase
-          .from('association_officers')
+          .from('organization')
           .select('position, is_super_admin')
           .eq('officer_id', userId)
           .single();
@@ -541,7 +541,7 @@ export class HarvestController {
         (data || []).map(async (harvest) => {
           if (harvest.verified_by) {
             const { data: verifier, error: verifierError } = await supabase
-              .from('association_officers')
+              .from('organization')
               .select('full_name, email')
               .eq('officer_id', harvest.verified_by)
               .single();
@@ -579,7 +579,7 @@ export class HarvestController {
       if (!isSuperAdmin && req.user?.userType === 'officer' && userId) {
         console.log('🔍 Super Admin route - checking if user is Super Admin by position...');
         const { data: officerData, error: officerError } = await supabase
-          .from('association_officers')
+          .from('organization')
           .select('position, is_super_admin')
           .eq('officer_id', userId)
           .single();

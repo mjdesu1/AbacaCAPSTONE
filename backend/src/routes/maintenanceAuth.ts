@@ -17,7 +17,7 @@ router.post('/maintenance-login', async (req: Request, res: Response) => {
 
     // 1. Find the officer by email
     const { data: officer, error } = await supabase
-      .from('association_officers')
+      .from('organization')
       .select('*')
       .eq('email', email.trim().toLowerCase())
       .single();
@@ -60,7 +60,7 @@ router.post('/maintenance-login', async (req: Request, res: Response) => {
 
     // 5. Update last login
     await supabase
-      .from('association_officers')
+      .from('organization')
       .update({ last_login: new Date() })
       .eq('officer_id', officer.officer_id);
 

@@ -6,12 +6,12 @@
 -- =====================================================
 
 -- First, ensure the is_super_admin column exists
-ALTER TABLE public.association_officers 
+ALTER TABLE public.organization 
 ADD COLUMN IF NOT EXISTS is_super_admin BOOLEAN DEFAULT false;
 
 -- Add index if not exists
-CREATE INDEX IF NOT EXISTS idx_officers_is_super_admin 
-ON public.association_officers(is_super_admin);
+CREATE INDEX IF NOT EXISTS idx_organization_is_super_admin 
+ON public.organization(is_super_admin);
 
 -- =====================================================
 -- SUPER ADMIN ACCOUNT
@@ -21,44 +21,42 @@ ON public.association_officers(is_super_admin);
 -- Hash generated with: bcrypt.hash('SuperAdmin123!@#', 10)
 
 -- Delete existing super admin if exists
-DELETE FROM association_officers WHERE email = 'superadmin@mao.gov.ph';
+DELETE FROM organization WHERE email = 'superadmin@mao.gov.ph';
 
-INSERT INTO association_officers (
+INSERT INTO organization (
     officer_id,
     full_name,
     position,
-    association_name,
+    office_name,
+    assigned_municipality,
+    assigned_barangay,
     contact_number,
     email,
     address,
-    term_start_date,
-    term_end_date,
-    term_duration,
-    farmers_under_supervision,
     password_hash,
     is_active,
     is_verified,
     profile_completed,
     is_super_admin,
+    verification_status,
     created_at,
     updated_at
 ) VALUES (
     uuid_generate_v4(),
     'Super Administrator',
     'System Administrator',
-    'MAO Culiram',
+    'Municipal Agriculture Office, Culiram',
+    'Prosperidad',
+    'All Barangays',
     '09171234567',
     'superadmin@mao.gov.ph',
     'Municipal Agriculture Office, Culiram, Prosperidad, Agusan del Sur',
-    '2024-01-01',
-    '2027-12-31',
-    '2024-2027',
-    0,
     '$2b$10$zB7r3qDotuIs74T/qQpuw.2nWml8ZJn5V8sFhk1hO2ZjVK.8rcLgC', -- SuperAdmin123!@#
     true,
     true,
     true,
     true, -- THIS IS THE SUPER ADMIN FLAG
+    'verified',
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP
 );
@@ -71,44 +69,42 @@ INSERT INTO association_officers (
 -- Hash generated with: bcrypt.hash('Admin123!@#', 10)
 
 -- Delete existing admin if exists
-DELETE FROM association_officers WHERE email = 'admin@mao.gov.ph';
+DELETE FROM organization WHERE email = 'admin@mao.gov.ph';
 
-INSERT INTO association_officers (
+INSERT INTO organization (
     officer_id,
     full_name,
     position,
-    association_name,
+    office_name,
+    assigned_municipality,
+    assigned_barangay,
     contact_number,
     email,
     address,
-    term_start_date,
-    term_end_date,
-    term_duration,
-    farmers_under_supervision,
     password_hash,
     is_active,
     is_verified,
     profile_completed,
     is_super_admin,
+    verification_status,
     created_at,
     updated_at
 ) VALUES (
     uuid_generate_v4(),
     'MAO Administrator',
     'Municipal Agriculture Officer',
-    'MAO Culiram',
+    'Municipal Agriculture Office, Culiram',
+    'Prosperidad',
+    'Culiram',
     '09187654321',
     'admin@mao.gov.ph',
     'Municipal Agriculture Office, Culiram, Prosperidad, Agusan del Sur',
-    '2024-01-01',
-    '2027-12-31',
-    '2024-2027',
-    0,
     '$2b$10$UeyNVRtBJ08yuPD3dtNkpOGrepxH2Pgf6qx6NS5NucdHxeV61uOn2', -- Admin123!@#
     true,
     true,
     true,
     false, -- THIS IS A REGULAR ADMIN (NOT SUPER ADMIN)
+    'verified',
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP
 );
@@ -126,7 +122,7 @@ SELECT
     is_super_admin,
     profile_completed,
     created_at
-FROM association_officers
+FROM organization
 WHERE email IN ('superadmin@mao.gov.ph', 'admin@mao.gov.ph')
 ORDER BY is_super_admin DESC;
 

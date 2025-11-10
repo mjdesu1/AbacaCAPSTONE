@@ -184,17 +184,11 @@ export interface OfficerRegistration {
   
   // Profile Information (Filled after first login or during public registration)
   position?: string;
-  associationName?: string;
+  officeName?: string; // Office name (e.g., Municipal Agriculture Office, Talacogon)
+  assignedMunicipality?: string; // Assigned municipality
+  assignedBarangay?: string; // Assigned barangay coverage
   contactNumber?: string;
   address?: string;
-  
-  // Term Information (Filled after first login)
-  termStartDate?: string;
-  termEndDate?: string;
-  termDuration?: string;
-  
-  // Supervision (Filled after first login)
-  farmersUnderSupervision?: number;
   
   // Additional
   remarks?: string;

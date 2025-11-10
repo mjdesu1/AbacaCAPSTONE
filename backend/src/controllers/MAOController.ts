@@ -35,40 +35,34 @@ export class MAOController {
 
       const {
         position,
-        associationName,
+        officeName,
+        assignedMunicipality,
+        assignedBarangay,
         contactNumber,
         address,
-        termStartDate,
-        termEndDate,
-        farmersUnderSupervision,
         profilePicture,
       } = req.body;
 
       console.log('📝 Received profile update data:', {
         position,
-        associationName,
+        officeName,
+        assignedMunicipality,
+        assignedBarangay,
         contactNumber,
         address,
         userId
       });
 
-      // Calculate term duration
-      const termDuration = termStartDate && termEndDate 
-        ? `${new Date(termStartDate).getFullYear()}-${new Date(termEndDate).getFullYear()}`
-        : null;
-
       // Update officer profile
       const { data, error } = await supabase
-        .from('association_officers')
+        .from('organization')
         .update({
           position,
-          association_name: associationName,
+          office_name: officeName,
+          assigned_municipality: assignedMunicipality,
+          assigned_barangay: assignedBarangay,
           contact_number: contactNumber,
           address,
-          term_start_date: termStartDate,
-          term_end_date: termEndDate,
-          term_duration: termDuration,
-          farmers_under_supervision: farmersUnderSupervision || 0,
           profile_picture: profilePicture || null, // Save base64 image or URL
           profile_completed: true,
           profile_completed_at: new Date().toISOString(),
@@ -88,7 +82,9 @@ export class MAOController {
         contact_number: data.contact_number,
         address: data.address,
         position: data.position,
-        association_name: data.association_name
+        office_name: data.office_name,
+        assigned_municipality: data.assigned_municipality,
+        assigned_barangay: data.assigned_barangay
       });
 
       res.status(200).json({
@@ -105,7 +101,7 @@ export class MAOController {
   static async getOfficers(req: Request, res: Response) {
     try {
       const { data, error } = await supabase
-        .from('association_officers')
+        .from('organization')
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -128,7 +124,7 @@ export class MAOController {
       const { id } = req.params;
 
       const { error } = await supabase
-        .from('association_officers')
+        .from('organization')
         .delete()
         .eq('officer_id', id);
 

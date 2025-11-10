@@ -1288,10 +1288,10 @@ const FarmerDashboard: React.FC<FarmerDashboardProps> = ({ onLogout }) => {
                       {selectedSeedling.status}
                     </span>
                   </div>
-                  {selectedSeedling.association_officers && (
+                  {selectedSeedling.organization && (
                     <div>
                       <p className="text-sm text-gray-600">Distributed By</p>
-                      <p className="font-medium text-gray-900">{selectedSeedling.association_officers.full_name}</p>
+                      <p className="font-medium text-gray-900">{selectedSeedling.organization.full_name}</p>
                     </div>
                   )}
                   {selectedSeedling.remarks && (

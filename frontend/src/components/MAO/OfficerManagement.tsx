@@ -7,17 +7,16 @@ interface Officer {
   full_name: string;
   email: string;
   position: string;
-  association_name: string;
+  office_name?: string;
+  assigned_municipality?: string;
+  assigned_barangay?: string;
   contact_number: string;
   address?: string;
-  term_start_date?: string;
-  term_end_date?: string;
-  term_duration?: string;
-  farmers_under_supervision?: number;
   profile_picture?: string;
   is_active: boolean;
   is_super_admin?: boolean;
   profile_completed: boolean;
+  verification_status?: string;
   created_at: string;
   updated_at?: string;
   last_login?: string;
@@ -119,7 +118,9 @@ const OfficerManagement: React.FC = () => {
     setEditFormData({
       full_name: officer.full_name,
       position: officer.position,
-      association_name: officer.association_name,
+      office_name: officer.office_name,
+      assigned_municipality: officer.assigned_municipality,
+      assigned_barangay: officer.assigned_barangay,
       contact_number: officer.contact_number,
       address: officer.address,
     });
@@ -344,7 +345,7 @@ const OfficerManagement: React.FC = () => {
                     Position
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Organization
+                    Office
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
@@ -390,7 +391,7 @@ const OfficerManagement: React.FC = () => {
                       {officer.position || '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                      {officer.association_name || '-'}
+                      {officer.office_name || '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-3 py-1 rounded-full text-xs font-medium ${
@@ -521,29 +522,17 @@ const OfficerManagement: React.FC = () => {
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="p-3 bg-gray-50 rounded-lg">
-                    <p className="text-xs text-gray-500">Organization</p>
-                    <p className="text-sm font-medium text-gray-800">{selectedOfficer.association_name || 'N/A'}</p>
+                    <p className="text-xs text-gray-500">Office Name</p>
+                    <p className="text-sm font-medium text-gray-800">{selectedOfficer.office_name || 'N/A'}</p>
                   </div>
                   <div className="p-3 bg-gray-50 rounded-lg">
-                    <p className="text-xs text-gray-500">Farmers Supervised</p>
-                    <p className="text-sm font-medium text-gray-800">{selectedOfficer.farmers_under_supervision || 0}</p>
+                    <p className="text-xs text-gray-500">Assigned Municipality</p>
+                    <p className="text-sm font-medium text-gray-800">{selectedOfficer.assigned_municipality || 'N/A'}</p>
                   </div>
-                  {selectedOfficer.term_start_date && (
-                    <>
-                      <div className="p-3 bg-gray-50 rounded-lg">
-                        <p className="text-xs text-gray-500">Term Start</p>
-                        <p className="text-sm font-medium text-gray-800">
-                          {new Date(selectedOfficer.term_start_date).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <div className="p-3 bg-gray-50 rounded-lg">
-                        <p className="text-xs text-gray-500">Term End</p>
-                        <p className="text-sm font-medium text-gray-800">
-                          {selectedOfficer.term_end_date ? new Date(selectedOfficer.term_end_date).toLocaleDateString() : 'N/A'}
-                        </p>
-                      </div>
-                    </>
-                  )}
+                  <div className="p-3 bg-gray-50 rounded-lg md:col-span-2">
+                    <p className="text-xs text-gray-500">Assigned Barangay Coverage</p>
+                    <p className="text-sm font-medium text-gray-800">{selectedOfficer.assigned_barangay || 'N/A'}</p>
+                  </div>
                 </div>
               </div>
 
@@ -659,12 +648,35 @@ const OfficerManagement: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Organization Name</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Office Name</label>
                 <input
                   type="text"
-                  value={editFormData.association_name || ''}
-                  onChange={(e) => setEditFormData({ ...editFormData, association_name: e.target.value })}
+                  value={editFormData.office_name || ''}
+                  onChange={(e) => setEditFormData({ ...editFormData, office_name: e.target.value })}
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition"
+                  placeholder="e.g., Municipal Agriculture Office, Talacogon"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Assigned Municipality</label>
+                <input
+                  type="text"
+                  value={editFormData.assigned_municipality || ''}
+                  onChange={(e) => setEditFormData({ ...editFormData, assigned_municipality: e.target.value })}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition"
+                  placeholder="e.g., Talacogon"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Assigned Barangay Coverage</label>
+                <input
+                  type="text"
+                  value={editFormData.assigned_barangay || ''}
+                  onChange={(e) => setEditFormData({ ...editFormData, assigned_barangay: e.target.value })}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition"
+                  placeholder="e.g., Barangay Poblacion, San Isidro"
                 />
               </div>
 

@@ -44,7 +44,7 @@ export class SeedlingController {
             email,
             association_name
           ),
-          association_officers:distributed_by (
+          organization:distributed_by (
             officer_id,
             full_name
           )
@@ -307,7 +307,7 @@ export class SeedlingController {
           planted_by,
           planted_at,
           created_at,
-          association_officers:distributed_by (
+          organization:distributed_by (
             officer_id,
             full_name
           )

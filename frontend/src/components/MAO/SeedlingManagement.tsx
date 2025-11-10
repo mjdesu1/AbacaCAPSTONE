@@ -48,7 +48,7 @@ interface Seedling {
     email: string;
     association_name?: string;
   };
-  association_officers?: {
+  organization?: {
     officer_id: string;
     full_name: string;
   };
@@ -928,7 +928,7 @@ const SeedlingManagement: React.FC = () => {
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Distributed By</p>
-                  <p className="font-medium text-gray-900">{selectedSeedling.association_officers?.full_name || 'N/A'}</p>
+                  <p className="font-medium text-gray-900">{selectedSeedling.organization?.full_name || 'N/A'}</p>
                 </div>
                 {selectedSeedling.remarks && (
                   <div className="col-span-2">

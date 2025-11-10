@@ -269,7 +269,7 @@ export class AuthService {
     try {
       // Check if email already exists
       const { data: existing } = await supabase
-        .from('association_officers')
+        .from('organization')
         .select('officer_id')
         .eq('email', data.email)
         .single();
@@ -296,24 +296,24 @@ export class AuthService {
       // If isSuperAdmin flag is set, mark profile as completed and set super admin privileges
       const isSuperAdmin = data.isSuperAdmin === true;
       
-      // Determine if this is a public registration (has position, associationName, etc.)
-      const isPublicRegistration = data.position && data.associationName;
+      // Determine if this is a public registration (has position, officeName, etc.)
+      const isPublicRegistration = data.position && data.officeName;
       
       const { data: officer, error } = await supabase
-        .from('association_officers')
+        .from('organization')
         .insert({
           full_name: data.fullName,
           email: data.email,
           password_hash: passwordHash,
           profile_picture: data.profilePhoto || data.profilePicture || null,
-          valid_id_photo: data.validIdPhoto || null,
           is_super_admin: isSuperAdmin,
           // Profile fields - set for public registration or super admin
           position: data.position || (isSuperAdmin ? 'System Administrator' : null),
-          association_name: data.associationName || (isSuperAdmin ? 'MAO Culiram' : null),
+          office_name: data.officeName || (isSuperAdmin ? 'Municipal Agriculture Office, Culiram' : null),
+          assigned_municipality: data.assignedMunicipality || (isSuperAdmin ? 'Prosperidad' : null),
+          assigned_barangay: data.assignedBarangay || (isSuperAdmin ? 'All Barangays' : null),
           contact_number: data.contactNumber || null,
           address: data.address || null,
-          term_duration: data.termDuration || null,
           profile_completed: isSuperAdmin ? true : isPublicRegistration,
           is_active: true,
           // Verification status: pending for public registration, verified for admin-created
@@ -368,7 +368,7 @@ export class AuthService {
           idField = 'buyer_id';
           break;
         case 'officer':
-          tableName = 'association_officers';
+          tableName = 'organization';
           idField = 'officer_id';
           break;
         default:
@@ -665,19 +665,21 @@ export class AuthService {
       officerId: data.officer_id,
       fullName: data.full_name,
       position: data.position,
-      associationName: data.association_name,
+      officeName: data.office_name,
+      assignedMunicipality: data.assigned_municipality,
+      assignedBarangay: data.assigned_barangay,
       contactNumber: data.contact_number,
       email: data.email,
       address: data.address,
-      termStartDate: data.term_start_date,
-      termEndDate: data.term_end_date,
-      termDuration: data.term_duration,
-      farmersUnderSupervision: data.farmers_under_supervision,
       remarks: data.remarks,
       isActive: data.is_active,
       isVerified: data.is_verified,
       isSuperAdmin: data.is_super_admin || false, // Super Admin flag
       profileCompleted: data.profile_completed || false, // Add profile completion status
+      verificationStatus: data.verification_status,
+      verifiedBy: data.verified_by,
+      verifiedAt: data.verified_at,
+      rejectionReason: data.rejection_reason,
       createdAt: data.created_at,
       updatedAt: data.updated_at,
       lastLogin: data.last_login,

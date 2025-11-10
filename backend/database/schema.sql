@@ -1,6 +1,31 @@
 -- WARNING: This schema is for context only and is not meant to be run.
 -- Table order and constraints may not be valid for execution.
 
+CREATE TABLE public.organization (
+  officer_id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  full_name character varying NOT NULL,
+  email character varying NOT NULL UNIQUE,
+  password_hash character varying NOT NULL,
+  position character varying,
+  office_name character varying,
+  assigned_municipality character varying,
+  assigned_barangay character varying,
+  contact_number character varying,
+  address text,
+  profile_completed boolean DEFAULT false,
+  is_active boolean DEFAULT true,
+  is_verified boolean DEFAULT true,
+  remarks text,
+  created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+  updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+  last_login timestamp with time zone,
+  profile_completed_at timestamp with time zone,
+  profile_picture text,
+  is_super_admin boolean DEFAULT false,
+  verification_status character varying DEFAULT 'pending'::character varying CHECK (verification_status::text = ANY (ARRAY['pending'::character varying, 'verified'::character varying, 'rejected'::character varying]::text[])),
+  CONSTRAINT organization_pkey PRIMARY KEY (officer_id)
+);
+
 CREATE TABLE public.association_officers (
   officer_id uuid NOT NULL DEFAULT uuid_generate_v4(),
   full_name character varying NOT NULL,
@@ -14,22 +39,26 @@ CREATE TABLE public.association_officers (
   term_end_date date,
   term_duration character varying,
   farmers_under_supervision integer DEFAULT 0,
-  profile_completed boolean DEFAULT false,
+  profile_picture text,
+  valid_id_photo text,
   is_active boolean DEFAULT true,
-  is_verified boolean DEFAULT true,
+  is_verified boolean DEFAULT false,
+  verification_status character varying DEFAULT 'pending'::character varying CHECK (verification_status::text = ANY (ARRAY['pending'::character varying, 'verified'::character varying, 'rejected'::character varying]::text[])),
+  verified_by uuid,
+  verified_at timestamp with time zone,
+  rejection_reason text,
   remarks text,
   created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
   updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
   last_login timestamp with time zone,
-  profile_completed_at timestamp with time zone,
-  profile_picture text,
-  is_super_admin boolean DEFAULT false,
-  CONSTRAINT association_officers_pkey PRIMARY KEY (officer_id)
+  CONSTRAINT association_officers_pkey PRIMARY KEY (officer_id),
+  CONSTRAINT association_officers_verified_by_fkey FOREIGN KEY (verified_by) REFERENCES public.organization(officer_id)
 );
+
 CREATE TABLE public.auth_audit_log (
   log_id uuid NOT NULL DEFAULT uuid_generate_v4(),
   user_id uuid,
-  user_type character varying CHECK (user_type::text = ANY (ARRAY['farmer'::character varying, 'buyer'::character varying, 'officer'::character varying]::text[])),
+  user_type character varying CHECK (user_type::text = ANY (ARRAY['farmer'::character varying, 'buyer'::character varying, 'officer'::character varying, 'association_officer'::character varying]::text[])),
   action character varying NOT NULL,
   ip_address character varying,
   user_agent text,
@@ -69,7 +98,7 @@ CREATE TABLE public.buyers (
   verified_at timestamp with time zone,
   rejection_reason text,
   CONSTRAINT buyers_pkey PRIMARY KEY (buyer_id),
-  CONSTRAINT buyers_verified_by_fkey FOREIGN KEY (verified_by) REFERENCES public.association_officers(officer_id)
+  CONSTRAINT buyers_verified_by_fkey FOREIGN KEY (verified_by) REFERENCES public.organization(officer_id)
 );
 CREATE TABLE public.farmers (
   farmer_id uuid NOT NULL DEFAULT uuid_generate_v4(),
@@ -107,7 +136,7 @@ CREATE TABLE public.farmers (
   verified_at timestamp with time zone,
   rejection_reason text,
   CONSTRAINT farmers_pkey PRIMARY KEY (farmer_id),
-  CONSTRAINT farmers_verified_by_fkey FOREIGN KEY (verified_by) REFERENCES public.association_officers(officer_id)
+  CONSTRAINT farmers_verified_by_fkey FOREIGN KEY (verified_by) REFERENCES public.organization(officer_id)
 );
 CREATE TABLE public.maintenance_logs (
   log_id uuid NOT NULL DEFAULT uuid_generate_v4(),
@@ -117,7 +146,7 @@ CREATE TABLE public.maintenance_logs (
   ip_address character varying,
   created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT maintenance_logs_pkey PRIMARY KEY (log_id),
-  CONSTRAINT maintenance_logs_enabled_by_fkey FOREIGN KEY (enabled_by) REFERENCES public.association_officers(officer_id)
+  CONSTRAINT maintenance_logs_enabled_by_fkey FOREIGN KEY (enabled_by) REFERENCES public.organization(officer_id)
 );
 CREATE TABLE public.refresh_tokens (
   token_id uuid NOT NULL DEFAULT uuid_generate_v4(),
@@ -154,7 +183,7 @@ CREATE TABLE public.seedlings (
   planted_by uuid,
   planted_at timestamp with time zone,
   CONSTRAINT seedlings_pkey PRIMARY KEY (seedling_id),
-  CONSTRAINT seedlings_distributed_by_fkey FOREIGN KEY (distributed_by) REFERENCES public.association_officers(officer_id),
+  CONSTRAINT seedlings_distributed_by_fkey FOREIGN KEY (distributed_by) REFERENCES public.organization(officer_id),
   CONSTRAINT seedlings_planted_by_fkey FOREIGN KEY (planted_by) REFERENCES public.farmers(farmer_id),
   CONSTRAINT seedlings_recipient_farmer_id_fkey FOREIGN KEY (recipient_farmer_id) REFERENCES public.farmers(farmer_id)
 );
@@ -167,5 +196,5 @@ CREATE TABLE public.system_settings (
   created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
   updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT system_settings_pkey PRIMARY KEY (setting_id),
-  CONSTRAINT system_settings_updated_by_fkey FOREIGN KEY (updated_by) REFERENCES public.association_officers(officer_id)
+  CONSTRAINT system_settings_updated_by_fkey FOREIGN KEY (updated_by) REFERENCES public.organization(officer_id)
 );

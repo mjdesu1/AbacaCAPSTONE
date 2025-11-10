@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, MapPin, Calendar, Users, Phone, Building2, Upload, X, ChevronRight, ChevronLeft } from 'lucide-react';
+import { User, MapPin, Phone, Building2, Upload, X, ChevronRight, ChevronLeft } from 'lucide-react';
 
 interface ProfileCompletionProps {
   onComplete: () => void;
@@ -9,12 +9,11 @@ const ProfileCompletion: React.FC<ProfileCompletionProps> = ({ onComplete }) => 
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     position: '',
-    associationName: '',
+    officeName: '',
+    assignedMunicipality: '',
+    assignedBarangay: '',
     contactNumber: '',
     address: '',
-    termStartDate: '',
-    termEndDate: '',
-    farmersUnderSupervision: '0',
   });
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>('');
@@ -84,7 +83,6 @@ const ProfileCompletion: React.FC<ProfileCompletionProps> = ({ onComplete }) => 
         },
         body: JSON.stringify({
           ...formData,
-          farmersUnderSupervision: parseInt(formData.farmersUnderSupervision) || 0,
           profilePicture: profilePictureData,
         }),
       });
@@ -152,20 +150,58 @@ const ProfileCompletion: React.FC<ProfileCompletionProps> = ({ onComplete }) => 
               />
             </div>
 
-            {/* Organization Name */}
+            {/* Office Name */}
             <div>
               <label className="flex items-center text-xs font-bold text-gray-600 mb-3 uppercase tracking-wide">
                 <div className="p-2 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg mr-2">
-                  <Users className="w-4 h-4 text-white" />
+                  <Building2 className="w-4 h-4 text-white" />
                 </div>
-                Organization Name
+                Office Name
               </label>
               <input
                 type="text"
-                name="associationName"
-                value={formData.associationName}
+                name="officeName"
+                value={formData.officeName}
                 onChange={handleChange}
-                placeholder="CuSAFA, ABACA Farmers Organization, etc."
+                placeholder="e.g., Municipal Agriculture Office, Talacogon"
+                className="w-full px-5 py-4 bg-gray-50 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all font-medium text-gray-800"
+                required
+              />
+            </div>
+
+            {/* Assigned Municipality */}
+            <div>
+              <label className="flex items-center text-xs font-bold text-gray-600 mb-3 uppercase tracking-wide">
+                <div className="p-2 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg mr-2">
+                  <MapPin className="w-4 h-4 text-white" />
+                </div>
+                Assigned Municipality
+              </label>
+              <input
+                type="text"
+                name="assignedMunicipality"
+                value={formData.assignedMunicipality}
+                onChange={handleChange}
+                placeholder="e.g., Talacogon"
+                className="w-full px-5 py-4 bg-gray-50 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all font-medium text-gray-800"
+                required
+              />
+            </div>
+
+            {/* Assigned Barangay Coverage */}
+            <div>
+              <label className="flex items-center text-xs font-bold text-gray-600 mb-3 uppercase tracking-wide">
+                <div className="p-2 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg mr-2">
+                  <MapPin className="w-4 h-4 text-white" />
+                </div>
+                Assigned Barangay Coverage
+              </label>
+              <input
+                type="text"
+                name="assignedBarangay"
+                value={formData.assignedBarangay}
+                onChange={handleChange}
+                placeholder="e.g., Barangay Poblacion, San Isidro"
                 className="w-full px-5 py-4 bg-gray-50 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all font-medium text-gray-800"
                 required
               />
@@ -216,42 +252,6 @@ const ProfileCompletion: React.FC<ProfileCompletionProps> = ({ onComplete }) => 
               />
             </div>
 
-            {/* Term Dates */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="flex items-center text-xs font-bold text-gray-600 mb-3 uppercase tracking-wide">
-                  <div className="p-2 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg mr-2">
-                    <Calendar className="w-4 h-4 text-white" />
-                  </div>
-                  Term Start Date
-                </label>
-                <input
-                  type="date"
-                  name="termStartDate"
-                  value={formData.termStartDate}
-                  onChange={handleChange}
-                  className="w-full px-5 py-4 bg-gray-50 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all font-medium text-gray-800"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="flex items-center text-xs font-bold text-gray-600 mb-3 uppercase tracking-wide">
-                  <div className="p-2 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg mr-2">
-                    <Calendar className="w-4 h-4 text-white" />
-                  </div>
-                  Term End Date
-                </label>
-                <input
-                  type="date"
-                  name="termEndDate"
-                  value={formData.termEndDate}
-                  onChange={handleChange}
-                  className="w-full px-5 py-4 bg-gray-50 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all font-medium text-gray-800"
-                  required
-                />
-              </div>
-            </div>
           </div>
         );
 
