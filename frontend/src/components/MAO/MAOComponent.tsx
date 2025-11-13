@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ProfileCompletion from './ProfileCompletion';
 import MAODashboard from './MAODashboard';
 
@@ -11,12 +12,14 @@ const MAOComponent: React.FC = () => {
     // Profile completion will be saved to database via API
   };
 
+  const navigate = useNavigate();
+
   const handleLogout = () => {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
     localStorage.removeItem('userType');
-    window.location.reload();
+    navigate('/mao');
   };
 
   // Check if profile is already completed from user data

@@ -20,10 +20,13 @@ import {
   Users as UsersIcon,
   Search,
   Filter,
-  Download
+  Download,
+  DollarSign
 } from 'lucide-react';
 import FarmerMonitoringView from './FarmerMonitoringView';
 import FarmerHarvestView from './FarmerHarvestView';
+import SalesReportForm from './SalesReportForm';
+import SalesReportsList from './SalesReportsList';
 
 interface FarmerDashboardProps {
   onLogout: () => void;
@@ -31,7 +34,8 @@ interface FarmerDashboardProps {
 
 const FarmerDashboard: React.FC<FarmerDashboardProps> = ({ onLogout }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [currentPage, setCurrentPage] = useState<'dashboard' | 'seedlings' | 'harvest' | 'harvest-submit' | 'monitoring' | 'profile'>('dashboard');
+  const [currentPage, setCurrentPage] = useState<'dashboard' | 'seedlings' | 'harvest' | 'harvest-submit' | 'monitoring' | 'sales-report' | 'profile'>('dashboard');
+  const [showSalesForm, setShowSalesForm] = useState(false);
   const [seedlings, setSeedlings] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [showPlantingModal, setShowPlantingModal] = useState(false);
@@ -264,8 +268,8 @@ const FarmerDashboard: React.FC<FarmerDashboardProps> = ({ onLogout }) => {
 
   // Mock stats - replace with real API data
   const stats = {
-    totalSeedlings: seedlings.reduce((sum, s) => sum + s.quantity_distributed, 0),
-    activePlantings: seedlings.filter(s => s.status === 'planted').length,
+    totalSeedlings: Array.isArray(seedlings) ? seedlings.reduce((sum, s) => sum + s.quantity_distributed, 0) : 0,
+    activePlantings: Array.isArray(seedlings) ? seedlings.filter(s => s.status === 'planted').length : 0,
     farmArea: user?.farmAreaHectares || 0,
     nextHarvest: '2 weeks'
   };
@@ -333,6 +337,19 @@ const FarmerDashboard: React.FC<FarmerDashboardProps> = ({ onLogout }) => {
           </button>
 
           <button
+            onClick={() => {
+              setCurrentPage('sales-report');
+              setShowSalesForm(false); // Always show list first
+            }}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition ${
+              currentPage === 'sales-report' ? 'bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg' : 'hover:bg-slate-700'
+            }`}
+          >
+            <FileText className="w-5 h-5" />
+            {sidebarOpen && <span>Sales Reports</span>}
+          </button>
+
+          <button
             onClick={() => setCurrentPage('profile')}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition ${
               currentPage === 'profile' ? 'bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg' : 'hover:bg-slate-700'
@@ -342,10 +359,6 @@ const FarmerDashboard: React.FC<FarmerDashboardProps> = ({ onLogout }) => {
             {sidebarOpen && <span>My Profile</span>}
           </button>
 
-          <button className="w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-700 rounded-lg transition">
-            <FileText className="w-5 h-5" />
-            {sidebarOpen && <span>Reports</span>}
-          </button>
         </nav>
 
         {/* Logout */}
@@ -371,6 +384,7 @@ const FarmerDashboard: React.FC<FarmerDashboardProps> = ({ onLogout }) => {
                  currentPage === 'seedlings' ? 'My Seedlings' :
                  currentPage === 'harvest' ? 'Harvest Records' :
                  currentPage === 'monitoring' ? 'Farm Monitoring' :
+                 currentPage === 'sales-report' ? (showSalesForm ? 'Submit Sales Report' : 'Sales Reports') :
                  'My Profile'}
               </h2>
               <p className="text-gray-600">Welcome back, {user?.fullName || 'Farmer'}!</p>
@@ -456,7 +470,7 @@ const FarmerDashboard: React.FC<FarmerDashboardProps> = ({ onLogout }) => {
                     <Sprout className="w-5 h-5 text-green-600" />
                     Recent Seedling Distributions
                   </h3>
-                  {seedlings.length === 0 ? (
+                  {!Array.isArray(seedlings) || seedlings.length === 0 ? (
                     <p className="text-gray-500 text-center py-8">No seedlings received yet</p>
                   ) : (
                     <div className="space-y-3">
@@ -556,7 +570,7 @@ const FarmerDashboard: React.FC<FarmerDashboardProps> = ({ onLogout }) => {
                       </div>
                       <p className="text-xs font-bold text-blue-700 uppercase tracking-wider">Total</p>
                     </div>
-                    <p className="text-3xl font-bold text-blue-900 mb-1">{seedlings.reduce((sum, s) => sum + s.quantity_distributed, 0).toLocaleString()}</p>
+                    <p className="text-3xl font-bold text-blue-900 mb-1">{Array.isArray(seedlings) ? seedlings.reduce((sum, s) => sum + s.quantity_distributed, 0).toLocaleString() : '0'}</p>
                     <p className="text-blue-600 text-sm font-medium">Seedlings Received</p>
                   </div>
 
@@ -567,7 +581,7 @@ const FarmerDashboard: React.FC<FarmerDashboardProps> = ({ onLogout }) => {
                       </div>
                       <p className="text-xs font-bold text-indigo-700 uppercase tracking-wider">Batches</p>
                     </div>
-                    <p className="text-3xl font-bold text-indigo-900 mb-1">{seedlings.length}</p>
+                    <p className="text-3xl font-bold text-indigo-900 mb-1">{Array.isArray(seedlings) ? seedlings.length : 0}</p>
                     <p className="text-indigo-600 text-sm font-medium">Distribution Records</p>
                   </div>
 
@@ -807,6 +821,27 @@ const FarmerDashboard: React.FC<FarmerDashboardProps> = ({ onLogout }) => {
           {currentPage === 'monitoring' && (
             <FarmerMonitoringView />
           )}
+
+          {/* Sales Report Page */}
+          {currentPage === 'sales-report' && (
+            <>
+              {showSalesForm ? (
+                <SalesReportForm
+                  onSubmit={(report) => {
+                    console.log('Sales report submitted:', report);
+                    alert('Sales report submitted successfully!');
+                    setShowSalesForm(false); // Go back to list view
+                  }}
+                  onCancel={() => setShowSalesForm(false)} // Go back to list view
+                />
+              ) : (
+                <SalesReportsList 
+                  onAddNewReport={() => setShowSalesForm(true)}
+                />
+              )}
+            </>
+          )}
+
 
           {currentPage === 'profile' && (
             <div className="bg-white rounded-xl shadow-lg">

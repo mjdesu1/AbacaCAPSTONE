@@ -338,13 +338,12 @@ export class UserManagementController {
   // OFFICER MANAGEMENT (Self-registered officers only)
   // =====================================================
 
-  // Get all officers (only self-registered with profile_completed = true)
+  // Get all association officers (from association_officers table)
   static async getOfficers(req: Request, res: Response) {
     try {
       const { data, error } = await supabase
-        .from('organization')
+        .from('association_officers')
         .select('*')
-        .eq('profile_completed', true) // Only self-registered officers
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -356,9 +355,7 @@ export class UserManagementController {
         email: officer.email,
         type: 'officer',
         status: officer.verification_status || (officer.is_verified ? 'verified' : 'pending'),
-        officeName: officer.office_name,
-        assignedMunicipality: officer.assigned_municipality,
-        assignedBarangay: officer.assigned_barangay,
+        association: officer.association_name,
         position: officer.position,
         contactNumber: officer.contact_number,
         createdAt: officer.created_at,
@@ -366,18 +363,18 @@ export class UserManagementController {
 
       res.status(200).json(officers);
     } catch (error) {
-      console.error('Error fetching officers:', error);
-      res.status(500).json({ error: 'Failed to fetch officers' });
+      console.error('Error fetching association officers:', error);
+      res.status(500).json({ error: 'Failed to fetch association officers' });
     }
   }
 
-  // Get single officer
+  // Get single association officer
   static async getOfficer(req: Request, res: Response) {
     try {
       const { id } = req.params;
 
       const { data, error } = await supabase
-        .from('organization')
+        .from('association_officers')
         .select('*')
         .eq('officer_id', id)
         .single();
@@ -386,8 +383,8 @@ export class UserManagementController {
 
       res.status(200).json(data);
     } catch (error) {
-      console.error('Error fetching officer:', error);
-      res.status(500).json({ error: 'Failed to fetch officer' });
+      console.error('Error fetching association officer:', error);
+      res.status(500).json({ error: 'Failed to fetch association officer' });
     }
   }
 
@@ -398,7 +395,7 @@ export class UserManagementController {
       const updates = req.body;
 
       const { data, error } = await supabase
-        .from('organization')
+        .from('association_officers')
         .update({
           ...updates,
           updated_at: new Date().toISOString(),
@@ -409,10 +406,10 @@ export class UserManagementController {
 
       if (error) throw error;
 
-      res.status(200).json(data);
+      res.status(200).json({ message: 'Association officer updated successfully', officer: data });
     } catch (error) {
-      console.error('Error updating officer:', error);
-      res.status(500).json({ error: 'Failed to update officer' });
+      console.error('Error updating association officer:', error);
+      res.status(500).json({ error: 'Failed to update association officer' });
     }
   }
 
@@ -423,7 +420,7 @@ export class UserManagementController {
       const verifier = (req as any).user;
 
       const { data, error } = await supabase
-        .from('organization')
+        .from('association_officers')
         .update({
           is_verified: true,
           verification_status: 'verified',
@@ -437,10 +434,10 @@ export class UserManagementController {
 
       if (error) throw error;
 
-      res.status(200).json({ message: 'Officer verified successfully', data });
+      res.status(200).json({ message: 'Association officer verified successfully', officer: data });
     } catch (error) {
-      console.error('Error verifying officer:', error);
-      res.status(500).json({ error: 'Failed to verify officer' });
+      console.error('Error verifying association officer:', error);
+      res.status(500).json({ error: 'Failed to verify association officer' });
     }
   }
 
@@ -456,9 +453,10 @@ export class UserManagementController {
       }
 
       const { data, error } = await supabase
-        .from('organization')
+        .from('association_officers')
         .update({
           is_verified: false,
+          is_active: false,
           verification_status: 'rejected',
           rejection_reason: reason,
           verified_by: verifier.userId,
@@ -471,10 +469,10 @@ export class UserManagementController {
 
       if (error) throw error;
 
-      res.status(200).json({ message: 'Officer rejected successfully', data });
+      res.status(200).json({ message: 'Association officer rejected successfully', officer: data });
     } catch (error) {
-      console.error('Error rejecting officer:', error);
-      res.status(500).json({ error: 'Failed to reject officer' });
+      console.error('Error rejecting association officer:', error);
+      res.status(500).json({ error: 'Failed to reject association officer' });
     }
   }
 
@@ -484,16 +482,16 @@ export class UserManagementController {
       const { id } = req.params;
 
       const { error } = await supabase
-        .from('organization')
+        .from('association_officers')
         .delete()
         .eq('officer_id', id);
 
       if (error) throw error;
 
-      res.status(200).json({ message: 'Officer deleted successfully' });
+      res.status(200).json({ message: 'Association officer deleted successfully' });
     } catch (error) {
-      console.error('Error deleting officer:', error);
-      res.status(500).json({ error: 'Failed to delete officer' });
+      console.error('Error deleting association officer:', error);
+      res.status(500).json({ error: 'Failed to delete association officer' });
     }
   }
 }

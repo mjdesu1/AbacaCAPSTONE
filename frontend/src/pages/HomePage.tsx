@@ -314,10 +314,7 @@ const HomePage: React.FC<HomePageProps> = ({ onLoginClick }) => {
 
             {/* Desktop Login Buttons - Far Right */}
             <div className="hidden md:flex items-center space-x-3">
-              <button onClick={() => onLoginClick('officer')} className="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-lg hover:shadow-lg transition-all font-semibold text-sm">
-                MAO Login
-              </button>
-              <button onClick={() => onLoginClick('buyer')} className="px-5 py-2.5 bg-white text-emerald-700 border-2 border-emerald-500 rounded-lg hover:bg-emerald-50 transition-all font-semibold text-sm">
+              <button onClick={() => onLoginClick('buyer')} className="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-lg hover:shadow-lg transition-all font-semibold text-sm">
                 Buyer Login
               </button>
               <button onClick={() => onLoginClick('farmer')} className="px-5 py-2.5 bg-white text-teal-700 border-2 border-teal-500 rounded-lg hover:bg-teal-50 transition-all font-semibold text-sm">
@@ -344,10 +341,7 @@ const HomePage: React.FC<HomePageProps> = ({ onLoginClick }) => {
           {/* Mobile Menu */}
           {mobileMenuOpen && (
             <div className="md:hidden pb-4 space-y-2 animate-in slide-in-from-top duration-200">
-              <button onClick={() => onLoginClick('officer')} className="w-full px-4 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl hover:shadow-lg transition-all font-medium">
-                MAO Login
-              </button>
-              <button onClick={() => onLoginClick('buyer')} className="w-full px-4 py-3 bg-white text-emerald-700 border-2 border-emerald-500 rounded-xl hover:bg-emerald-50 transition-all font-medium">
+              <button onClick={() => onLoginClick('buyer')} className="w-full px-4 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl hover:shadow-lg transition-all font-medium">
                 Buyer Login
               </button>
               <button onClick={() => onLoginClick('farmer')} className="w-full px-4 py-3 bg-white text-teal-700 border-2 border-teal-500 rounded-xl hover:bg-teal-50 transition-all font-medium">

@@ -15,6 +15,7 @@ import articlesRoutes from './routes/articlesRoutes';
 import teamRoutes from './routes/teamRoutes';
 import harvestRoutes from './routes/harvestRoutes';
 import inventoryRoutes from './routes/inventoryRoutes';
+import salesRoutes from './routes/salesRoutes';
 
 // Import config
 import { config } from './config/env';
@@ -43,6 +44,7 @@ app.use('/api/articles', articlesRoutes);
 app.use('/api/team', teamRoutes);
 app.use('/api/harvests', harvestRoutes);
 app.use('/api/inventory', inventoryRoutes);
+app.use('/api/sales', salesRoutes);
 
 app.get('/', (req: Request, res: Response) => {
   res.json({ message: 'MAO Culiram Abaca System API' });

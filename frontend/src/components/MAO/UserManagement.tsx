@@ -88,7 +88,7 @@ const UserManagement: React.FC = () => {
       } else if (activeTab === 'buyers') {
         endpoint = 'http://localhost:3001/api/mao/buyers-list';
       } else if (activeTab === 'officers') {
-        endpoint = 'http://localhost:3001/api/mao/officers/pending';
+        endpoint = 'http://localhost:3001/api/mao/association-officers';
       }
 
       const response = await fetch(endpoint, {
@@ -117,7 +117,7 @@ const UserManagement: React.FC = () => {
       } else if (activeTab === 'buyers') {
         endpoint = `http://localhost:3001/api/mao/buyers/${userId}`;
       } else if (activeTab === 'officers') {
-        endpoint = `http://localhost:3001/api/mao/officers/${userId}`;
+        endpoint = `http://localhost:3001/api/mao/association-officers/${userId}`;
       }
 
       const response = await fetch(endpoint, {
@@ -147,7 +147,7 @@ const UserManagement: React.FC = () => {
       } else if (activeTab === 'buyers') {
         endpoint = `http://localhost:3001/api/mao/buyers/${userId}/verify`;
       } else if (activeTab === 'officers') {
-        endpoint = `http://localhost:3001/api/mao/officers/${userId}/verify`;
+        endpoint = `http://localhost:3001/api/mao/association-officers/${userId}/verify`;
       }
 
       const response = await fetch(endpoint, {
@@ -182,7 +182,7 @@ const UserManagement: React.FC = () => {
       } else if (activeTab === 'buyers') {
         endpoint = `http://localhost:3001/api/mao/buyers/${selectedUser.id}/reject`;
       } else if (activeTab === 'officers') {
-        endpoint = `http://localhost:3001/api/mao/officers/${selectedUser.id}/reject`;
+        endpoint = `http://localhost:3001/api/mao/association-officers/${selectedUser.id}/reject`;
       }
 
       const response = await fetch(endpoint, {
@@ -221,7 +221,7 @@ const UserManagement: React.FC = () => {
       } else if (activeTab === 'buyers') {
         endpoint = `http://localhost:3001/api/mao/buyers/${userId}`;
       } else if (activeTab === 'officers') {
-        endpoint = `http://localhost:3001/api/mao/officers/${userId}`;
+        endpoint = `http://localhost:3001/api/mao/association-officers/${userId}`;
       }
 
       const response = await fetch(endpoint, {
@@ -246,9 +246,15 @@ const UserManagement: React.FC = () => {
 
     try {
       const token = localStorage.getItem('accessToken');
-      const endpoint = activeTab === 'farmers'
-        ? `http://localhost:3001/api/mao/farmers/${selectedUser.id}`
-        : `http://localhost:3001/api/mao/buyers/${selectedUser.id}`;
+      let endpoint = '';
+      
+      if (activeTab === 'farmers') {
+        endpoint = `http://localhost:3001/api/mao/farmers/${selectedUser.id}`;
+      } else if (activeTab === 'buyers') {
+        endpoint = `http://localhost:3001/api/mao/buyers/${selectedUser.id}`;
+      } else if (activeTab === 'officers') {
+        endpoint = `http://localhost:3001/api/mao/association-officers/${selectedUser.id}`;
+      }
 
       const response = await fetch(endpoint, {
         method: 'PUT',
@@ -401,7 +407,7 @@ const UserManagement: React.FC = () => {
           }`}>
             <Building2 className="w-5 h-5" />
           </div>
-          <span>Officers</span>
+          <span>Association</span>
           {activeTab === 'officers' && (
             <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1/2 h-1 bg-white rounded-full"></div>
           )}
@@ -688,7 +694,7 @@ const UserManagement: React.FC = () => {
           <div className="bg-white rounded-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white z-10">
               <h2 className="text-2xl font-bold text-gray-800">
-                {activeTab === 'farmers' ? 'Farmer' : 'Buyer'} Details
+                {activeTab === 'farmers' ? 'Farmer' : activeTab === 'buyers' ? 'Buyer' : 'Association Officer'} Details
               </h2>
               <button
                 onClick={() => {

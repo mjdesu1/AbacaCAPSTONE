@@ -23,7 +23,8 @@ import {
   Calendar,
   Eye,
   BookOpen,
-  FileText
+  FileText,
+  DollarSign
 } from 'lucide-react';
 import UserManagement from './UserManagement';
 import OfficerManagement from './OfficerManagement';
@@ -33,6 +34,7 @@ import MonitoringPage from '../../pages/MonitoringPage';
 import ArticleManagement from './ArticleManagement';
 import TeamManagement from './TeamManagement';
 import MAOHarvestVerificationPage from '../../pages/MAOHarvestVerificationPage';
+import UnifiedSalesManagement from './UnifiedSalesManagement';
 
 interface MAODashboardProps {
   onLogout: () => void;
@@ -41,7 +43,7 @@ interface MAODashboardProps {
 const MAODashboard: React.FC<MAODashboardProps> = ({ onLogout }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useState<'farmers' | 'buyers'>('farmers');
-  const [currentPage, setCurrentPage] = useState<'dashboard' | 'users' | 'officers' | 'maintenance' | 'seedlings' | 'monitoring' | 'content' | 'harvests'>('dashboard');
+  const [currentPage, setCurrentPage] = useState<'dashboard' | 'users' | 'officers' | 'maintenance' | 'seedlings' | 'monitoring' | 'content' | 'harvests' | 'sales-analytics'>('dashboard');
   const [contentTab, setContentTab] = useState<'articles' | 'team'>('articles');
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -72,6 +74,8 @@ const MAODashboard: React.FC<MAODashboardProps> = ({ onLogout }) => {
     fullName: user?.fullName,
     position: user?.position
   });
+  
+  // Note: All features are now available to both admin and super admin
 
   // Fetch officer profile data
   const fetchOfficerProfile = async () => {
@@ -282,7 +286,7 @@ const MAODashboard: React.FC<MAODashboardProps> = ({ onLogout }) => {
           <div className={`transition-all duration-300 ease-in-out ${sidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0'} overflow-hidden`}>
             <h1 className="text-xl font-bold whitespace-nowrap">MAO Culiram</h1>
             <p className="text-xs text-slate-400 whitespace-nowrap">
-              {isSuperAdmin ? '⭐ Super Admin Panel' : 'Officer Panel'}
+              {isSuperAdmin ? '⭐ Super Admin Panel' : '🛡️ Admin Panel'}
             </p>
           </div>
           <button
@@ -345,49 +349,53 @@ const MAODashboard: React.FC<MAODashboardProps> = ({ onLogout }) => {
             <span className={`transition-all duration-300 ease-in-out whitespace-nowrap ${sidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0'} overflow-hidden`}>Harvest Verification</span>
           </button>
 
-          {/* Content Management - Only for Super Admin */}
-          {isSuperAdmin && (
-            <button 
-              onClick={() => setCurrentPage('content')}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
-                currentPage === 'content' ? 'bg-emerald-600' : 'hover:bg-slate-700'
-              } ${!sidebarOpen && 'justify-center'}`}
-            >
-              <FileText className="w-5 h-5 flex-shrink-0" />
-              <span className={`transition-all duration-300 ease-in-out whitespace-nowrap ${sidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0'} overflow-hidden`}>Content Management</span>
-            </button>
-          )}
+          <button 
+            onClick={() => setCurrentPage('sales-analytics')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+              currentPage === 'sales-analytics' ? 'bg-emerald-600' : 'hover:bg-slate-700'
+            } ${!sidebarOpen && 'justify-center'}`}
+          >
+            <DollarSign className="w-5 h-5 flex-shrink-0" />
+            <span className={`transition-all duration-300 ease-in-out whitespace-nowrap ${sidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0'} overflow-hidden`}>Sales Management</span>
+          </button>
+
+          {/* Content Management - Available to all admins */}
+          <button 
+            onClick={() => setCurrentPage('content')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+              currentPage === 'content' ? 'bg-emerald-600' : 'hover:bg-slate-700'
+            } ${!sidebarOpen && 'justify-center'}`}
+          >
+            <FileText className="w-5 h-5 flex-shrink-0" />
+            <span className={`transition-all duration-300 ease-in-out whitespace-nowrap ${sidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0'} overflow-hidden`}>Content Management</span>
+          </button>
           
-          {/* Officer Management - Only for Super Admin */}
-          {isSuperAdmin && (
-            <button 
-              onClick={() => setCurrentPage('officers')}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
-                currentPage === 'officers' ? 'bg-emerald-600' : 'hover:bg-slate-700'
-              } ${!sidebarOpen && 'justify-center'}`}
-            >
-              <Users className="w-5 h-5 flex-shrink-0" />
-              <span className={`transition-all duration-300 ease-in-out whitespace-nowrap ${sidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0'} overflow-hidden`}>Officer Management</span>
-            </button>
-          )}
+          {/* Officer Management - Available to all admins */}
+          <button 
+            onClick={() => setCurrentPage('officers')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+              currentPage === 'officers' ? 'bg-emerald-600' : 'hover:bg-slate-700'
+            } ${!sidebarOpen && 'justify-center'}`}
+          >
+            <Shield className="w-5 h-5 flex-shrink-0" />
+            <span className={`transition-all duration-300 ease-in-out whitespace-nowrap ${sidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0'} overflow-hidden`}>Officer Management</span>
+          </button>
           
           <button className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-700 rounded-lg transition-all duration-200 ${!sidebarOpen && 'justify-center'}`}>
             <BarChart3 className="w-5 h-5 flex-shrink-0" />
             <span className={`transition-all duration-300 ease-in-out whitespace-nowrap ${sidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0'} overflow-hidden`}>Reports</span>
           </button>
           
-          {/* Maintenance Mode - Only for Super Admin */}
-          {isSuperAdmin && (
-            <button 
-              onClick={() => setCurrentPage('maintenance')}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
-                currentPage === 'maintenance' ? 'bg-amber-600' : 'hover:bg-slate-700'
-              } ${!sidebarOpen && 'justify-center'}`}
-            >
-              <Wrench className="w-5 h-5 flex-shrink-0" />
-              <span className={`transition-all duration-300 ease-in-out whitespace-nowrap ${sidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0'} overflow-hidden`}>Maintenance</span>
-            </button>
-          )}
+          {/* Maintenance Mode - Available to all admins */}
+          <button 
+            onClick={() => setCurrentPage('maintenance')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+              currentPage === 'maintenance' ? 'bg-emerald-600' : 'hover:bg-slate-700'
+            } ${!sidebarOpen && 'justify-center'}`}
+          >
+            <Settings className="w-5 h-5 flex-shrink-0" />
+            <span className={`transition-all duration-300 ease-in-out whitespace-nowrap ${sidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0'} overflow-hidden`}>Maintenance Mode</span>
+          </button>
         </nav>
 
         {/* Logout */}
@@ -414,13 +422,14 @@ const MAODashboard: React.FC<MAODashboardProps> = ({ onLogout }) => {
                  currentPage === 'seedlings' ? 'Seedling Distribution' :
                  currentPage === 'monitoring' ? 'Field Monitoring' :
                  currentPage === 'harvests' ? 'Harvest Management' :
+                 currentPage === 'sales-analytics' ? 'Sales Management' :
                  currentPage === 'officers' ? 'Officer Management' :
                  currentPage === 'maintenance' ? 'Maintenance Mode' :
                  currentPage === 'content' ? 'Content Management' :
                  'Dashboard'}
               </h2>
               <p className="text-gray-600">
-                Welcome back, {isSuperAdmin ? 'Super Admin' : 'Officer'}
+                Welcome back, {isSuperAdmin ? 'Super Admin' : 'Admin'}
               </p>
             </div>
             {/* Profile Dropdown */}
@@ -437,7 +446,7 @@ const MAODashboard: React.FC<MAODashboardProps> = ({ onLogout }) => {
                     {isSuperAdmin ? (
                       <span className="text-amber-600 font-semibold">⭐ Super Admin</span>
                     ) : (
-                      'MAO Officer'
+                      <span className="text-blue-600 font-semibold">🛡️ Admin</span>
                     )}
                   </p>
                 </div>
@@ -499,6 +508,8 @@ const MAODashboard: React.FC<MAODashboardProps> = ({ onLogout }) => {
           <MonitoringPage />
         ) : currentPage === 'harvests' ? (
           <MAOHarvestVerificationPage />
+        ) : currentPage === 'sales-analytics' ? (
+          <UnifiedSalesManagement />
         ) : currentPage === 'officers' ? (
           <OfficerManagement />
         ) : currentPage === 'maintenance' ? (
@@ -781,12 +792,14 @@ const MAODashboard: React.FC<MAODashboardProps> = ({ onLogout }) => {
                     <div>
                       <h3 className="text-3xl font-bold text-gray-800">{officerData?.full_name || user?.fullName}</h3>
                       <p className="text-gray-600 font-semibold text-lg mt-1">{officerData?.position || user?.position}</p>
-                      {isSuperAdmin && (
-                        <span className="inline-flex items-center gap-1.5 mt-3 px-4 py-1.5 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full text-xs font-bold border-2 border-amber-300 shadow-md text-white">
-                          <Shield className="w-4 h-4" />
-                          SUPER ADMINISTRATOR
-                        </span>
-                      )}
+                      <span className={`inline-flex items-center gap-1.5 mt-3 px-4 py-1.5 rounded-full text-xs font-bold border-2 shadow-md text-white ${
+                        isSuperAdmin 
+                          ? 'bg-gradient-to-r from-amber-400 to-orange-500 border-amber-300' 
+                          : 'bg-gradient-to-r from-blue-500 to-indigo-600 border-blue-300'
+                      }`}>
+                        <Shield className="w-4 h-4" />
+                        {isSuperAdmin ? 'SUPER ADMINISTRATOR' : 'ADMINISTRATOR'}
+                      </span>
                     </div>
                   </div>
                 </div>

@@ -83,8 +83,8 @@ export const OfficerAuth: React.FC<OfficerAuthProps> = ({ onBack, onLoginSuccess
             <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-purple-100 flex items-center justify-center">
               <Users className="w-8 h-8 text-purple-600" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-1">MAO Login</h2>
-            <p className="text-gray-600 text-sm">For association officers</p>
+            <h2 className="text-2xl font-bold text-gray-800 mb-1">Admin Portal</h2>
+            <p className="text-gray-600 text-sm">For MAO officers and administrators</p>
           </div>
 
           {error && (
